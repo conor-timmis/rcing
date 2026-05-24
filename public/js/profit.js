@@ -75,11 +75,17 @@ function bindProfitControls() {
   }
 }
 
-async function loadProfit() {
+async function loadProfit(initialPrices = null) {
   populateRuneFilter();
   bindProfitControls();
 
   const status = document.getElementById("profit-status");
+  if (initialPrices) {
+    cachedPrices = initialPrices;
+    renderProfit(cachedPrices);
+    return;
+  }
+
   try {
     const res = await fetch("/api/prices");
     if (!res.ok) throw new Error("API error");

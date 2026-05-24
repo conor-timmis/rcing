@@ -18,6 +18,7 @@
     <nav class="tab-nav" role="tablist">
       <button class="tab active" role="tab" data-tab="glossary" aria-selected="true">Glossary</button>
       <button class="tab" role="tab" data-tab="profit" aria-selected="false">Profit</button>
+      <button class="tab" role="tab" data-tab="combination" aria-selected="false">Combination runes</button>
     </nav>
 
     <main class="content">
@@ -77,6 +78,49 @@
           <tbody></tbody>
         </table>
       </section>
+
+      <section id="panel-combination" class="panel" role="tabpanel" hidden>
+        <p class="panel-note">Best combination-rune recipe from live prices. Binding necklace gives 100% success; Magic Imbue removes the talisman input.</p>
+
+        <div class="controls">
+          <label>
+            Runecraft level
+            <input type="number" id="combo-rc-level" min="1" max="99" value="99">
+          </label>
+
+          <label>
+            Essences / action
+            <input type="number" id="combo-essences-action" min="1" max="200" value="26" step="1">
+          </label>
+
+          <label class="toggle">
+            <input type="checkbox" id="combo-binding-toggle" checked>
+            Binding necklace
+          </label>
+
+          <label class="toggle">
+            <input type="checkbox" id="combo-imbue-toggle" checked>
+            Magic Imbue
+          </label>
+        </div>
+
+        <div class="status" id="combination-status">Loading prices…</div>
+        <table class="data-table" id="combination-table">
+          <thead>
+            <tr>
+              <th>Rune</th>
+              <th>Req</th>
+              <th>Price</th>
+              <th>Best recipe</th>
+              <th>Cost / ess</th>
+              <th>Runes / ess</th>
+              <th>GP / ess</th>
+              <th>GP / action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
     </main>
 
     <footer class="site-footer">
@@ -89,6 +133,7 @@
   <script src="/js/calc.js"></script>
   <script src="/js/glossary.js"></script>
   <script src="/js/profit.js"></script>
+  <script src="/js/combination.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>

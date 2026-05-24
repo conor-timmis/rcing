@@ -171,6 +171,172 @@ const RUNES = [
 const PURE_ESSENCE_ID = 7936;
 const WIKI_ICON = "https://oldschool.runescape.wiki/images";
 
+const ITEM_IDS = {
+  airRune: 556,
+  waterRune: 555,
+  earthRune: 557,
+  fireRune: 554,
+  astralRune: 9075,
+  airTalisman: 1438,
+  waterTalisman: 1444,
+  earthTalisman: 1440,
+  fireTalisman: 1442,
+  bindingNecklace: 5521,
+};
+
+const MAGIC_IMBUE_COSTS = [
+  { itemId: ITEM_IDS.astralRune, qty: 2, name: "Astral rune" },
+  { itemId: ITEM_IDS.fireRune, qty: 7, name: "Fire rune" },
+  { itemId: ITEM_IDS.waterRune, qty: 7, name: "Water rune" },
+];
+
+const COMBINATION_RUNES = [
+  {
+    id: "mist",
+    name: "Mist rune",
+    itemId: 4695,
+    reqLevel: 6,
+    routes: [
+      {
+        altar: "Air altar",
+        inputName: "Water rune",
+        inputItemId: ITEM_IDS.waterRune,
+        talismanName: "Water talisman",
+        talismanItemId: ITEM_IDS.waterTalisman,
+        xp: 8,
+      },
+      {
+        altar: "Water altar",
+        inputName: "Air rune",
+        inputItemId: ITEM_IDS.airRune,
+        talismanName: "Air talisman",
+        talismanItemId: ITEM_IDS.airTalisman,
+        xp: 8.5,
+      },
+    ],
+  },
+  {
+    id: "dust",
+    name: "Dust rune",
+    itemId: 4696,
+    reqLevel: 10,
+    routes: [
+      {
+        altar: "Air altar",
+        inputName: "Earth rune",
+        inputItemId: ITEM_IDS.earthRune,
+        talismanName: "Earth talisman",
+        talismanItemId: ITEM_IDS.earthTalisman,
+        xp: 8.3,
+      },
+      {
+        altar: "Earth altar",
+        inputName: "Air rune",
+        inputItemId: ITEM_IDS.airRune,
+        talismanName: "Air talisman",
+        talismanItemId: ITEM_IDS.airTalisman,
+        xp: 9,
+      },
+    ],
+  },
+  {
+    id: "mud",
+    name: "Mud rune",
+    itemId: 4698,
+    reqLevel: 13,
+    routes: [
+      {
+        altar: "Water altar",
+        inputName: "Earth rune",
+        inputItemId: ITEM_IDS.earthRune,
+        talismanName: "Earth talisman",
+        talismanItemId: ITEM_IDS.earthTalisman,
+        xp: 9.3,
+      },
+      {
+        altar: "Earth altar",
+        inputName: "Water rune",
+        inputItemId: ITEM_IDS.waterRune,
+        talismanName: "Water talisman",
+        talismanItemId: ITEM_IDS.waterTalisman,
+        xp: 9.5,
+      },
+    ],
+  },
+  {
+    id: "smoke",
+    name: "Smoke rune",
+    itemId: 4697,
+    reqLevel: 15,
+    routes: [
+      {
+        altar: "Air altar",
+        inputName: "Fire rune",
+        inputItemId: ITEM_IDS.fireRune,
+        talismanName: "Fire talisman",
+        talismanItemId: ITEM_IDS.fireTalisman,
+        xp: 8.5,
+      },
+      {
+        altar: "Fire altar",
+        inputName: "Air rune",
+        inputItemId: ITEM_IDS.airRune,
+        talismanName: "Air talisman",
+        talismanItemId: ITEM_IDS.airTalisman,
+        xp: 9.5,
+      },
+    ],
+  },
+  {
+    id: "steam",
+    name: "Steam rune",
+    itemId: 4694,
+    reqLevel: 19,
+    routes: [
+      {
+        altar: "Water altar",
+        inputName: "Fire rune",
+        inputItemId: ITEM_IDS.fireRune,
+        talismanName: "Fire talisman",
+        talismanItemId: ITEM_IDS.fireTalisman,
+        xp: 9.3,
+      },
+      {
+        altar: "Fire altar",
+        inputName: "Water rune",
+        inputItemId: ITEM_IDS.waterRune,
+        talismanName: "Water talisman",
+        talismanItemId: ITEM_IDS.waterTalisman,
+        xp: 10,
+      },
+    ],
+  },
+  {
+    id: "lava",
+    name: "Lava rune",
+    itemId: 4699,
+    reqLevel: 23,
+    routes: [
+      {
+        altar: "Earth altar",
+        inputName: "Fire rune",
+        inputItemId: ITEM_IDS.fireRune,
+        talismanName: "Fire talisman",
+        talismanItemId: ITEM_IDS.fireTalisman,
+        xp: 10,
+      },
+      {
+        altar: "Fire altar",
+        inputName: "Earth rune",
+        inputItemId: ITEM_IDS.earthRune,
+        talismanName: "Earth talisman",
+        talismanItemId: ITEM_IDS.earthTalisman,
+        xp: 10.5,
+      },
+    ],
+  },
+];
+
 function runeIconUrl(name) {
   const file = name.replace(/ /g, "_") + ".png";
   return `${WIKI_ICON}/${file}`;

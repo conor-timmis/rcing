@@ -10,7 +10,7 @@ function midPrice(entry) {
 function formatGp(n) {
   if (n == null || Number.isNaN(n)) return "—";
   const sign = n < 0 ? "−" : "";
-  return sign + Math.abs(n).toLocaleString() + " gp";
+  return sign + Math.round(Math.abs(n)).toLocaleString() + " gp";
 }
 
 function trend(latestEntry, dayEntry) {
@@ -85,4 +85,83 @@ function profitPerEssence(rune, rcLevel, eyeEnabled, prices) {
 function profitPerHour(profitPerEss, essencesHour) {
   if (profitPerEss == null) return null;
   return Math.round(profitPerEss * essencesHour);
+}
+
+function totalItemCost(prices, items) {
+  let cost = 0;
+  for (const item of items) {
+    const price = getItemPrice(prices, item.itemId);
+    if (price == null) return null;
+    cost += price * item.qty;
+  }
+  return cost;
+}
+
+function combinationRouteProfit(combo, route, options, prices) {
+  const essenceCount = Math.max(1, options.essencesPerAction || 1);
+  const essencePrice = getItemPrice(prices, PURE_ESSENCE_ID);
+  const inputPrice = getItemPrice(prices, route.inputItemId);
+  const runePrice = getItemPrice(prices, combo.itemId);
+
+  if (essencePrice == null || inputPrice == null || runePrice == null) {
+    return {
+      route,
+      runePrice,
+      cost: null,
+      revenue: null,
+      profit: null,
+      actionProfit: null,
+      outputPerEssence: null,
+    };
+  }
+
+  let actionCost = 0;
+  if (options.magicImbue) {
+    const spellCost = totalItemCost(prices, MAGIC_IMBUE_COSTS);
+    if (spellCost == null) actionCost = null;
+    else actionCost += spellCost;
+  } else {
+    const talismanPrice = getItemPrice(prices, route.talismanItemId);
+    if (talismanPrice == null) actionCost = null;
+    else actionCost += talismanPrice;
+  }
+
+  if (options.bindingNecklace && actionCost != null) {
+    const necklacePrice = getItemPrice(prices, ITEM_IDS.bindingNecklace);
+    if (necklacePrice == null) actionCost = null;
+    else actionCost += necklacePrice / 16;
+  }
+
+  if (actionCost == null) {
+    return {
+      route,
+      runePrice,
+      cost: null,
+      revenue: null,
+      profit: null,
+      actionProfit: null,
+      outputPerEssence: null,
+    };
+  }
+
+  const cost = essencePrice + inputPrice + actionCost / essenceCount;
+  const outputPerEssence = options.bindingNecklace ? 1 : 0.5;
+  const revenue = runePrice * outputPerEssence;
+  const profit = revenue - cost;
+
+  return {
+    route,
+    runePrice,
+    cost,
+    revenue,
+    profit,
+    actionProfit: profit * essenceCount,
+    outputPerEssence,
+  };
+}
+
+function bestCombinationRoute(combo, options, prices) {
+  return combo.routes
+    .map((route) => combinationRouteProfit(combo, route, options, prices))
+    .sort((a, b) => (b.profit ?? -Infinity) - (a.profit ?? -Infinity))[0];
 }
