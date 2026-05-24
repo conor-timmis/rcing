@@ -30,7 +30,7 @@ function renderProfit(prices) {
   const rows = [
     ...RUNES.map((rune) => normalProfitRow(rune, options, prices)),
     ...COMBINATION_RUNES.map((combo) => combinationProfitRow(combo, options, prices)),
-  ];
+  ].sort((a, b) => a.rune.reqLevel - b.rune.reqLevel || a.rune.name.localeCompare(b.rune.name));
 
   for (const row of rows) {
     const { rune, canCraft, profit, gpHour } = row;

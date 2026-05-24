@@ -111,6 +111,29 @@ a {
   align-items: flex-end;
 }
 
+.profit-controls {
+  align-items: stretch;
+  gap: 14px;
+}
+
+.control-group {
+  display: flex;
+  flex: 1 1 260px;
+  flex-wrap: wrap;
+  gap: 12px 14px;
+  align-content: flex-start;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid #6b5a3e;
+  background: rgba(43, 36, 25, 0.35);
+}
+
+.control-group legend {
+  padding: 0 6px;
+  color: #c8a84b;
+  font-size: 0.9rem;
+}
+
 .controls label {
   display: flex;
   flex-direction: column;
@@ -123,11 +146,48 @@ a {
 .controls select {
   background: #2b2419;
   border: 1px solid #6b5a3e;
+  border-radius: 2px;
   color: #f0e6d2;
   font-family: inherit;
   font-size: 1rem;
-  padding: 4px 8px;
-  width: 140px;
+  min-height: 32px;
+  padding: 5px 9px;
+  width: 150px;
+}
+
+.controls select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #c8a84b 50%),
+    linear-gradient(135deg, #c8a84b 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 13px,
+    calc(100% - 9px) 13px;
+  background-repeat: no-repeat;
+  background-size: 5px 5px, 5px 5px;
+  padding-right: 28px;
+  width: 210px;
+}
+
+.controls input[type="number"]:focus,
+.controls select:focus {
+  border-color: #c8a84b;
+  outline: 1px solid rgba(200, 168, 75, 0.35);
+}
+
+.controls input[type="number"]:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.controls input[type="number"] {
+  appearance: textfield;
+}
+
+.controls input[type="number"]::-webkit-outer-spin-button,
+.controls input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
 }
 
 .controls .toggle {
@@ -135,6 +195,8 @@ a {
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  min-height: 32px;
+  padding-top: 18px;
 }
 
 .controls .toggle input {
@@ -214,6 +276,10 @@ a {
   .controls input[type="number"],
   .controls select {
     width: 100%;
+  }
+
+  .control-group {
+    flex-basis: 100%;
   }
 
   .data-table {

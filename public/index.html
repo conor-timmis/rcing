@@ -40,51 +40,60 @@
       <section id="panel-profit" class="panel" role="tabpanel" hidden>
         <p class="panel-note">Profit per essence and per hour. Abyss presets use researched pouch capacities and 50 trips/hour by default.</p>
 
-        <div class="controls">
-          <label>
-            Runecraft level
-            <input type="number" id="rc-level" min="1" max="99" value="99">
-          </label>
+        <div class="controls profit-controls">
+          <fieldset class="control-group">
+            <legend>Character</legend>
+            <label>
+              Runecraft level
+              <input type="number" id="rc-level" min="1" max="99" value="99">
+            </label>
 
-          <label class="toggle">
-            <input type="checkbox" id="eye-toggle">
-            Raiments of the Eye (full set, +60%)
-          </label>
+            <label class="toggle">
+              <input type="checkbox" id="eye-toggle">
+              Raiments of the Eye
+            </label>
+          </fieldset>
 
-          <label class="toggle">
-            <input type="checkbox" id="abyss-recommended-toggle">
-            Recommended for Abyss
-          </label>
+          <fieldset class="control-group">
+            <legend>Abyss throughput</legend>
+            <label class="toggle">
+              <input type="checkbox" id="abyss-recommended-toggle">
+              Recommended preset
+            </label>
 
-          <label>
-            Pouch setup
-            <select id="pouch-setup">
-              <option value="inventory">Inventory only</option>
-              <option value="standard">Best standard pouches</option>
-              <option value="colossal">Colossal pouch</option>
-              <option value="manual">Manual essences / trip</option>
-            </select>
-          </label>
+            <label>
+              Pouch setup
+              <select id="pouch-setup">
+                <option value="inventory">Inventory only</option>
+                <option value="standard">Best standard pouches</option>
+                <option value="colossal">Colossal pouch</option>
+                <option value="manual">Manual essences / trip</option>
+              </select>
+            </label>
 
-          <label>
-            Trips / hour
-            <input type="number" id="trips-hour" min="1" max="120" value="50" step="1">
-          </label>
+            <label>
+              Trips / hour
+              <input type="number" id="trips-hour" min="1" max="120" value="50" step="1">
+            </label>
 
-          <label>
-            Essences / trip
-            <input type="number" id="essences-trip" min="1" max="200" value="67" step="1">
-          </label>
+            <label>
+              Essences / trip
+              <input type="number" id="essences-trip" min="1" max="200" value="67" step="1">
+            </label>
+          </fieldset>
 
-          <label class="toggle">
-            <input type="checkbox" id="combo-binding-toggle" checked>
-            Binding necklace
-          </label>
+          <fieldset class="control-group">
+            <legend>Combination runes</legend>
+            <label class="toggle">
+              <input type="checkbox" id="combo-binding-toggle" checked>
+              Binding necklace
+            </label>
 
-          <label class="toggle">
-            <input type="checkbox" id="combo-imbue-toggle" checked>
-            Magic Imbue
-          </label>
+            <label class="toggle">
+              <input type="checkbox" id="combo-imbue-toggle" checked>
+              Magic Imbue
+            </label>
+          </fieldset>
         </div>
 
         <div class="status" id="profit-status">Loading prices…</div>
