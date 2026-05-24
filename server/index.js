@@ -87,6 +87,10 @@ app.get("/api/prices/:id", async (req, res) => {
   }
 });
 
+app.get("/.well-known/discord", (_req, res) => {
+  res.type("text/plain").send("dh=bc6d779eb639f1d2323c7d718dcc43260cf7ea7b");
+});
+
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.listen(PORT, () => {
