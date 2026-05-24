@@ -15,11 +15,15 @@ if (fs.existsSync(envPath)) {
   }
 }
 const session = require("express-session");
+const FileStore = require("session-file-store")(session);
 const { router: authRouter, seedAdminUser } = require("./auth");
 const { router: issuesRouter } = require("./issues");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const DATA_DIR = path.join(__dirname, "..", "data");
+const SESSIONS_DIR = path.join(DATA_DIR, "sessions");
+const SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 const WIKI_BASE = "https://prices.runescape.wiki/api/v1/osrs";
 const USER_AGENT = "rcing.net - runecrafting resource site";
@@ -79,8 +83,18 @@ function midPrice(entry) {
 }
 
 app.use(express.json());
+
+if (!fs.existsSync(SESSIONS_DIR)) {
+  fs.mkdirSync(SESSIONS_DIR, { recursive: true });
+}
+
 app.use(
   session({
+    store: new FileStore({
+      path: SESSIONS_DIR,
+      ttl: SESSION_MAX_AGE_MS / 1000,
+      retries: 0,
+    }),
     secret: process.env.SESSION_SECRET || "rcing-dev-session-secret",
     resave: false,
     saveUninitialized: false,
@@ -88,7 +102,7 @@ app.use(
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: SESSION_MAX_AGE_MS,
     },
   }),
 );
