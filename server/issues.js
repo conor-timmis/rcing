@@ -7,6 +7,28 @@ const router = express.Router();
 const NAME_MAX = 64;
 const BODY_MIN = 10;
 const BODY_MAX = 5000;
+const SUBMIT_COOLDOWN_MS = 60_000;
+
+const lastSubmitByIp = new Map();
+
+function clientIp(req) {
+  return req.ip || req.socket?.remoteAddress || "unknown";
+}
+
+function submitCooldown(req) {
+  const ip = clientIp(req);
+  const last = lastSubmitByIp.get(ip);
+  if (!last) return null;
+
+  const remainingMs = SUBMIT_COOLDOWN_MS - (Date.now() - last);
+  if (remainingMs <= 0) return null;
+
+  return Math.ceil(remainingMs / 1000);
+}
+
+function recordSubmit(req) {
+  lastSubmitByIp.set(clientIp(req), Date.now());
+}
 
 function publicIssue(issue) {
   return {
@@ -30,6 +52,13 @@ router.get("/", requireAdmin, (_req, res) => {
 });
 
 router.post("/", (req, res) => {
+  const waitSec = submitCooldown(req);
+  if (waitSec) {
+    return res.status(429).json({
+      error: `Please wait ${waitSec} second${waitSec === 1 ? "" : "s"} before submitting another issue.`,
+    });
+  }
+
   const name = normalizeName(req.body.name);
   const body = String(req.body.body ?? "").trim();
 
@@ -49,6 +78,8 @@ router.post("/", (req, res) => {
     store.issues.push(entry);
     return entry;
   });
+
+  recordSubmit(req);
 
   res.status(201).json({ issue: publicIssue(issue) });
 });

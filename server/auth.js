@@ -41,14 +41,25 @@ function seedAdminUser() {
   const password = process.env.ADMIN_PASSWORD;
   if (!username || !password) return;
 
+  const trimmed = username.trim();
+  const normalized = trimmed.toLowerCase();
+
   mutateStore((store) => {
+    const existing = store.users.find((user) => user.usernameLower === normalized);
+    const { salt, hash } = hashPassword(password);
+
+    if (existing) {
+      existing.salt = salt;
+      existing.passwordHash = hash;
+      return existing;
+    }
+
     if (store.users.length > 0) return null;
 
-    const { salt, hash } = hashPassword(password);
     const user = {
       id: store.nextUserId++,
-      username: username.trim(),
-      usernameLower: username.trim().toLowerCase(),
+      username: trimmed,
+      usernameLower: normalized,
       salt,
       passwordHash: hash,
       role: "admin",

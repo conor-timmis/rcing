@@ -390,6 +390,12 @@ a {
   white-space: pre-wrap;
 }
 
+.issue-status {
+  margin-top: 10px;
+  color: #b8a88a;
+  font-size: 0.85rem;
+}
+
 .action-cell {
   display: flex;
   flex-wrap: wrap;
