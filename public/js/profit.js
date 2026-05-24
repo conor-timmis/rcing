@@ -6,12 +6,11 @@ function renderProfit(prices) {
   const status = document.getElementById("profit-status");
   tbody.innerHTML = "";
 
-  const rcLevel = parseInt(document.getElementById("rc-level").value, 10) || 1;
+  const rcLevel = readClampedInput("rc-level", 1, LEVEL_MAX, 1);
   const eyeEnabled = document.getElementById("eye-toggle").checked;
   const pouchSetup = document.getElementById("pouch-setup").value;
-  const tripsHour = parseInt(document.getElementById("trips-hour").value, 10) || 50;
-  const manualEssencesPerTrip =
-    parseInt(document.getElementById("essences-trip").value, 10) || 1;
+  const tripsHour = readClampedInput("trips-hour", 1, INPUT_MAX, 1);
+  const manualEssencesPerTrip = readClampedInput("essences-trip", 1, INPUT_MAX, 1);
   const bindingNecklace = document.getElementById("combo-binding-toggle").checked;
   const magicImbue = document.getElementById("combo-imbue-toggle").checked;
   const pouch = pouchSummary(pouchSetup, rcLevel, manualEssencesPerTrip);
@@ -78,44 +77,22 @@ function bindProfitControls() {
   if (profitControlsBound) return;
   profitControlsBound = true;
 
-  const inputs = [
-    "rc-level",
+  const onUpdate = () => {
+    if (cachedPrices) renderProfit(cachedPrices);
+  };
+
+  bindClampedInput("rc-level", { min: 1, max: LEVEL_MAX, fallback: 1, onUpdate });
+  bindClampedInput("trips-hour", { min: 1, max: INPUT_MAX, fallback: 1, onUpdate });
+  bindClampedInput("essences-trip", { min: 1, max: INPUT_MAX, fallback: 1, onUpdate });
+
+  for (const id of [
     "eye-toggle",
-    "abyss-recommended-toggle",
     "pouch-setup",
-    "trips-hour",
-    "essences-trip",
     "combo-binding-toggle",
     "combo-imbue-toggle",
-  ];
-  for (const id of inputs) {
-    document.getElementById(id).addEventListener("input", () => {
-      applyAbyssRecommendation(id);
-      if (cachedPrices) renderProfit(cachedPrices);
-    });
-    document.getElementById(id).addEventListener("change", () => {
-      applyAbyssRecommendation(id);
-      if (cachedPrices) renderProfit(cachedPrices);
-    });
+  ]) {
+    bindControl(id, onUpdate);
   }
-}
-
-function applyAbyssRecommendation(changedId) {
-  const toggle = document.getElementById("abyss-recommended-toggle");
-  if (!toggle.checked) return;
-
-  if (
-    !["abyss-recommended-toggle", "rc-level"].includes(changedId) &&
-    changedId !== "eye-toggle"
-  ) {
-    toggle.checked = false;
-    return;
-  }
-
-  const rcLevel = parseInt(document.getElementById("rc-level").value, 10) || 1;
-  document.getElementById("pouch-setup").value = recommendedAbyssSetup(rcLevel);
-  document.getElementById("trips-hour").value = 50;
-  document.getElementById("eye-toggle").checked = true;
 }
 
 async function loadProfit(initialPrices = null) {

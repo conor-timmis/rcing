@@ -15,24 +15,14 @@ function formatQty(n) {
 }
 
 function gotrOptionsFromForm() {
-  const rcLevel = parseInt(document.getElementById("gotr-rc-level").value, 10) || 27;
-  const gamesPerHour = parseInt(document.getElementById("gotr-games-hour").value, 10) || 6;
-  const elementalPoints =
-    parseInt(document.getElementById("gotr-elemental-points").value, 10) || 0;
-  const catalyticPoints =
-    parseInt(document.getElementById("gotr-catalytic-points").value, 10) || 0;
-  const boostedRates = document.getElementById("gotr-boosted-rates").checked;
-  const lantern = document.getElementById("gotr-lantern-toggle").checked;
-  const comboRunes = document.getElementById("gotr-combo-toggle").checked;
-
   return {
-    rcLevel,
-    gamesPerHour,
-    elementalPoints,
-    catalyticPoints,
-    boostedRates,
-    lantern,
-    comboRunes,
+    rcLevel: readClampedInput("gotr-rc-level", 27, LEVEL_MAX, 27),
+    gamesPerHour: readClampedInput("gotr-games-hour", 1, INPUT_MAX, 1),
+    elementalPoints: readClampedInput("gotr-elemental-points", 0, INPUT_MAX, 1),
+    catalyticPoints: readClampedInput("gotr-catalytic-points", 0, INPUT_MAX, 1),
+    boostedRates: document.getElementById("gotr-boosted-rates").checked,
+    lantern: document.getElementById("gotr-lantern-toggle").checked,
+    comboRunes: document.getElementById("gotr-combo-toggle").checked,
   };
 }
 
@@ -91,24 +81,17 @@ function bindGotrControls() {
   if (gotrControlsBound) return;
   gotrControlsBound = true;
 
-  const ids = [
-    "gotr-rc-level",
-    "gotr-games-hour",
-    "gotr-elemental-points",
-    "gotr-catalytic-points",
-    "gotr-boosted-rates",
-    "gotr-lantern-toggle",
-    "gotr-combo-toggle",
-  ];
+  const onUpdate = () => {
+    if (gotrCachedPrices) renderGotr(gotrCachedPrices);
+  };
 
-  for (const id of ids) {
-    const el = document.getElementById(id);
-    el.addEventListener("input", () => {
-      if (gotrCachedPrices) renderGotr(gotrCachedPrices);
-    });
-    el.addEventListener("change", () => {
-      if (gotrCachedPrices) renderGotr(gotrCachedPrices);
-    });
+  bindClampedInput("gotr-rc-level", { min: 27, max: LEVEL_MAX, fallback: 27, onUpdate });
+  bindClampedInput("gotr-games-hour", { min: 1, max: INPUT_MAX, fallback: 1, onUpdate });
+  bindClampedInput("gotr-elemental-points", { min: 0, max: INPUT_MAX, fallback: 1, onUpdate });
+  bindClampedInput("gotr-catalytic-points", { min: 0, max: INPUT_MAX, fallback: 1, onUpdate });
+
+  for (const id of ["gotr-boosted-rates", "gotr-lantern-toggle", "gotr-combo-toggle"]) {
+    bindControl(id, onUpdate);
   }
 }
 

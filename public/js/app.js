@@ -1,4 +1,4 @@
-const CORE_SCRIPTS = ["/js/runes.js", "/js/calc.js"];
+const CORE_SCRIPTS = ["/js/runes.js", "/js/inputs.js", "/js/calc.js"];
 
 const TAB_SCRIPTS = {
   glossary: ["/js/glossary.js"],

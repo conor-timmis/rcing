@@ -122,10 +122,6 @@ function pouchSummary(setupId, rcLevel, manualEssencesPerTrip) {
   return { name: "Inventory only", essencesPerTrip: 28 };
 }
 
-function recommendedAbyssSetup(rcLevel) {
-  return rcLevel >= 85 ? "colossal" : "standard";
-}
-
 function totalItemCost(prices, items) {
   let cost = 0;
   for (const item of items) {
