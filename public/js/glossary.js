@@ -3,14 +3,12 @@ function renderGlossary(prices) {
   const status = document.getElementById("glossary-status");
   tbody.innerHTML = "";
 
-  let loaded = 0;
-  for (const rune of RUNES) {
+  const glossaryRunes = [...RUNES, ...COMBINATION_RUNES];
+  for (const rune of glossaryRunes) {
     const latest = prices.latest[rune.itemId];
     const day = prices.day[rune.itemId];
     const price = midPrice(latest);
     const t = trend(latest, day);
-
-    if (price != null) loaded++;
 
     const tr = document.createElement("tr");
     if (price == null) tr.classList.add("unavailable");
@@ -25,7 +23,7 @@ function renderGlossary(prices) {
       <td>
         <span class="rune-name">
           <img src="${runeIconUrl(rune.name)}" alt="" width="18" height="18">
-          ${rune.name}${rune.members ? "" : " <small>(F2P)</small>"}
+          ${rune.name}${rune.members === false ? " <small>(F2P)</small>" : ""}
         </span>
       </td>
       <td>${formatGp(price)}</td>
@@ -37,7 +35,7 @@ function renderGlossary(prices) {
   const when = prices.cachedAt
     ? new Date(prices.cachedAt).toLocaleTimeString()
     : "now";
-  status.textContent = `${loaded}/${RUNES.length} prices loaded · updated ${when}`;
+  status.textContent = `Updated ${when}`;
 }
 
 async function loadGlossary() {

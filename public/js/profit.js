@@ -1,15 +1,5 @@
 let cachedPrices = null;
 
-function populateRuneFilter() {
-  const select = document.getElementById("rune-filter");
-  for (const rune of RUNES) {
-    const opt = document.createElement("option");
-    opt.value = rune.id;
-    opt.textContent = rune.name;
-    select.appendChild(opt);
-  }
-}
-
 function renderProfit(prices) {
   const tbody = document.querySelector("#profit-table tbody");
   const status = document.getElementById("profit-status");
@@ -17,12 +7,9 @@ function renderProfit(prices) {
 
   const rcLevel = parseInt(document.getElementById("rc-level").value, 10) || 1;
   const eyeEnabled = document.getElementById("eye-toggle").checked;
-  const filter = document.getElementById("rune-filter").value;
   const essHour = parseInt(document.getElementById("essences-hour").value, 10) || 2000;
 
-  const runes = filter === "all" ? RUNES : RUNES.filter((r) => r.id === filter);
-
-  for (const rune of runes) {
+  for (const rune of RUNES) {
     const { base, total, profit } = profitPerEssence(rune, rcLevel, eyeEnabled, prices);
     const gph = profitPerHour(profit, essHour);
     const canCraft = rcLevel >= rune.reqLevel;
@@ -64,7 +51,7 @@ function renderProfit(prices) {
 }
 
 function bindProfitControls() {
-  const inputs = ["rc-level", "rune-filter", "eye-toggle", "essences-hour"];
+  const inputs = ["rc-level", "eye-toggle", "essences-hour"];
   for (const id of inputs) {
     document.getElementById(id).addEventListener("input", () => {
       if (cachedPrices) renderProfit(cachedPrices);
@@ -76,7 +63,6 @@ function bindProfitControls() {
 }
 
 async function loadProfit(initialPrices = null) {
-  populateRuneFilter();
   bindProfitControls();
 
   const status = document.getElementById("profit-status");

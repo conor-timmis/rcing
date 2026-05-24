@@ -65,7 +65,7 @@ function profitPerEssence(rune, rcLevel, eyeEnabled, prices) {
     const essPrice = getItemPrice(prices, rune.essenceItemId);
     if (essPrice == null) costKnown = false;
     else cost += essPrice;
-  } else if (!rune.extraCosts) {
+  } else if (!rune.extraCosts && !rune.freeInput) {
     costKnown = false;
   }
 
@@ -115,12 +115,15 @@ function combinationRouteProfit(combo, route, options, prices) {
     };
   }
 
+  const usesMagicImbue = options.magicImbue || route.requiresMagicImbue;
+  const outputPerEssence = options.bindingNecklace ? 1 : 0.5;
+
   let actionCost = 0;
-  if (options.magicImbue) {
+  if (usesMagicImbue) {
     const spellCost = totalItemCost(prices, MAGIC_IMBUE_COSTS);
     if (spellCost == null) actionCost = null;
     else actionCost += spellCost;
-  } else {
+  } else if (route.talismanItemId) {
     const talismanPrice = getItemPrice(prices, route.talismanItemId);
     if (talismanPrice == null) actionCost = null;
     else actionCost += talismanPrice;
@@ -144,8 +147,24 @@ function combinationRouteProfit(combo, route, options, prices) {
     };
   }
 
-  const cost = essencePrice + inputPrice + actionCost / essenceCount;
-  const outputPerEssence = options.bindingNecklace ? 1 : 0.5;
+  let successCost = 0;
+  if (route.successCosts) {
+    const routeSuccessCost = totalItemCost(prices, route.successCosts);
+    if (routeSuccessCost == null) {
+      return {
+        route,
+        runePrice,
+        cost: null,
+        revenue: null,
+        profit: null,
+        actionProfit: null,
+        outputPerEssence: null,
+      };
+    }
+    successCost = routeSuccessCost * outputPerEssence;
+  }
+
+  const cost = essencePrice + inputPrice + successCost + actionCost / essenceCount;
   const revenue = runePrice * outputPerEssence;
   const profit = revenue - cost;
 

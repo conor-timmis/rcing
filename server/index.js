@@ -7,8 +7,9 @@ const PORT = process.env.PORT || 3000;
 const WIKI_BASE = "https://prices.runescape.wiki/api/v1/osrs";
 const USER_AGENT = "rcing.net - runecrafting resource site";
 
-const CACHE_TTL_MS = 60_000;
+const CACHE_TTL_MS = 15 * 60_000;
 let priceCache = { data: null, fetchedAt: 0 };
+let refreshPromise = null;
 
 async function fetchWiki(endpoint) {
   const res = await fetch(`${WIKI_BASE}/${endpoint}`, {
@@ -26,16 +27,31 @@ async function getPrices() {
     return priceCache.data;
   }
 
-  const [latest, day] = await Promise.all([
-    fetchWiki("latest"),
-    fetchWiki("24h"),
-  ]);
+  return refreshPrices();
+}
 
-  priceCache = {
-    data: { latest: latest.data, day: day.data },
-    fetchedAt: now,
-  };
-  return priceCache.data;
+async function refreshPrices() {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    const now = Date.now();
+    const [latest, day] = await Promise.all([
+      fetchWiki("latest"),
+      fetchWiki("24h"),
+    ]);
+
+    priceCache = {
+      data: { latest: latest.data, day: day.data },
+      fetchedAt: now,
+    };
+    return priceCache.data;
+  })();
+
+  try {
+    return await refreshPromise;
+  } finally {
+    refreshPromise = null;
+  }
 }
 
 function midPrice(entry) {
@@ -75,4 +91,8 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.listen(PORT, () => {
   console.log(`rcing.net listening on http://localhost:${PORT}`);
+  refreshPrices().catch((err) => console.error("Initial price refresh failed", err));
+  setInterval(() => {
+    refreshPrices().catch((err) => console.error("Scheduled price refresh failed", err));
+  }, CACHE_TTL_MS);
 });

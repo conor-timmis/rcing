@@ -30,7 +30,7 @@
             <tr>
               <th>Rune</th>
               <th>Price</th>
-              <th>Trend</th>
+              <th>Trend (24h)</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -44,13 +44,6 @@
           <label>
             Runecraft level
             <input type="number" id="rc-level" min="1" max="99" value="99">
-          </label>
-
-          <label>
-            Filter rune
-            <select id="rune-filter">
-              <option value="all">All runes</option>
-            </select>
           </label>
 
           <label class="toggle">
@@ -69,7 +62,7 @@
           <thead>
             <tr>
               <th>Rune</th>
-              <th>Req</th>
+              <th>Level req</th>
               <th>Runes / ess</th>
               <th>GP / ess</th>
               <th>GP / hour</th>
@@ -80,7 +73,7 @@
       </section>
 
       <section id="panel-combination" class="panel" role="tabpanel" hidden>
-        <p class="panel-note">Best combination-rune recipe from live prices. Binding necklace gives 100% success; Magic Imbue removes the talisman input.</p>
+        <p class="panel-note">Best combination-rune recipe from live prices. Binding necklace gives 100% success; Magic Imbue removes elemental talismans. Aether always includes Magic Imbue and catalyst cost.</p>
 
         <div class="controls">
           <label>
@@ -109,9 +102,9 @@
           <thead>
             <tr>
               <th>Rune</th>
-              <th>Req</th>
+              <th>Level req</th>
               <th>Price</th>
-              <th>Best recipe</th>
+              <th>Method</th>
               <th>Cost / ess</th>
               <th>Runes / ess</th>
               <th>GP / ess</th>
@@ -124,8 +117,7 @@
     </main>
 
     <footer class="site-footer">
-      Prices via <a href="https://oldschool.runescape.wiki/w/RuneScape:Real-time_Prices" target="_blank" rel="noopener">OSRS Wiki</a>.
-      Not affiliated with Jagex.
+      rcing.net 2026
     </footer>
   </div>
 

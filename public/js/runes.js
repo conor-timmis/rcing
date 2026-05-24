@@ -142,8 +142,8 @@ const RUNES = [
     members: true,
     multipliers: [77],
     xp: 10.5,
-    essenceItemId: null,
-    note: "Uses dark essence fragments",
+    essenceItemId: 7936,
+    note: "True Blood Altar uses pure essence",
   },
   {
     id: "soul",
@@ -154,6 +154,7 @@ const RUNES = [
     multipliers: [90],
     xp: 11,
     essenceItemId: null,
+    freeInput: true,
     note: "Uses dark essence fragments",
   },
   {
@@ -176,12 +177,14 @@ const ITEM_IDS = {
   waterRune: 555,
   earthRune: 557,
   fireRune: 554,
+  soulRune: 566,
   astralRune: 9075,
   airTalisman: 1438,
   waterTalisman: 1444,
   earthTalisman: 1440,
   fireTalisman: 1442,
   bindingNecklace: 5521,
+  aetherCatalyst: 30771,
 };
 
 const MAGIC_IMBUE_COSTS = [
@@ -196,6 +199,7 @@ const COMBINATION_RUNES = [
     name: "Mist rune",
     itemId: 4695,
     reqLevel: 6,
+    members: true,
     routes: [
       {
         altar: "Air altar",
@@ -220,6 +224,7 @@ const COMBINATION_RUNES = [
     name: "Dust rune",
     itemId: 4696,
     reqLevel: 10,
+    members: true,
     routes: [
       {
         altar: "Air altar",
@@ -244,6 +249,7 @@ const COMBINATION_RUNES = [
     name: "Mud rune",
     itemId: 4698,
     reqLevel: 13,
+    members: true,
     routes: [
       {
         altar: "Water altar",
@@ -268,6 +274,7 @@ const COMBINATION_RUNES = [
     name: "Smoke rune",
     itemId: 4697,
     reqLevel: 15,
+    members: true,
     routes: [
       {
         altar: "Air altar",
@@ -292,6 +299,7 @@ const COMBINATION_RUNES = [
     name: "Steam rune",
     itemId: 4694,
     reqLevel: 19,
+    members: true,
     routes: [
       {
         altar: "Water altar",
@@ -316,6 +324,7 @@ const COMBINATION_RUNES = [
     name: "Lava rune",
     itemId: 4699,
     reqLevel: 23,
+    members: true,
     routes: [
       {
         altar: "Earth altar",
@@ -332,6 +341,25 @@ const COMBINATION_RUNES = [
         talismanName: "Earth talisman",
         talismanItemId: ITEM_IDS.earthTalisman,
         xp: 10.5,
+      },
+    ],
+  },
+  {
+    id: "aether",
+    name: "Aether rune",
+    itemId: 30843,
+    reqLevel: 90,
+    members: true,
+    routes: [
+      {
+        altar: "Cosmic altar",
+        inputName: "Soul rune",
+        inputItemId: ITEM_IDS.soulRune,
+        requiresMagicImbue: true,
+        successCosts: [
+          { itemId: ITEM_IDS.aetherCatalyst, qty: 1, name: "Aether catalyst" },
+        ],
+        xp: 20,
       },
     ],
   },

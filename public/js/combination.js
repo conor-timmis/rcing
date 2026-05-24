@@ -33,9 +33,12 @@ function renderCombinationRunes(prices) {
     const tr = document.createElement("tr");
     if (!canCraft) tr.classList.add("unavailable");
 
-    const routeNote = magicImbue
-      ? `${route.altar} with ${route.inputName}`
-      : `${route.altar} with ${route.inputName} + ${route.talismanName}`;
+    const extraInputs = route.successCosts?.map((item) => item.name) ?? [];
+    const routeInputs = [route.inputName, ...extraInputs].join(" + ");
+    const routeNote =
+      magicImbue || route.requiresMagicImbue
+        ? `${route.altar} with ${routeInputs}`
+        : `${route.altar} with ${routeInputs} + ${route.talismanName}`;
 
     tr.innerHTML = `
       <td>
@@ -56,7 +59,7 @@ function renderCombinationRunes(prices) {
   }
 
   const necklaceLabel = bindingNecklace ? "Binding necklace ON" : "50% success";
-  const imbueLabel = magicImbue ? "Magic Imbue ON" : "Talisman cost ON";
+  const imbueLabel = magicImbue ? "Magic Imbue ON" : "Talismans where required";
   status.textContent = `Level ${rcLevel} · ${essencesPerAction.toLocaleString()} ess/action · ${necklaceLabel} · ${imbueLabel}`;
 }
 
