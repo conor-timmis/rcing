@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>rcing.net — Runecrafting</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <a href="/" class="logo">
+        <img src="https://oldschool.runescape.wiki/images/Runecraft_icon.png" alt="" width="28" height="28">
+        <span class="logo-text">rcing.net</span>
+      </a>
+    </header>
+
+    <nav class="tab-nav" role="tablist">
+      <button class="tab active" role="tab" data-tab="glossary" aria-selected="true">Glossary</button>
+      <button class="tab" role="tab" data-tab="profit" aria-selected="false">Profit</button>
+    </nav>
+
+    <main class="content">
+      <section id="panel-glossary" class="panel active" role="tabpanel">
+        <p class="panel-note">Grand Exchange prices from the OSRS Wiki. Trend vs 24h average.</p>
+        <div class="status" id="glossary-status">Loading prices…</div>
+        <table class="data-table" id="glossary-table">
+          <thead>
+            <tr>
+              <th>Rune</th>
+              <th>Price</th>
+              <th>Trend</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section id="panel-profit" class="panel" role="tabpanel" hidden>
+        <p class="panel-note">Profit per essence at your Runecrafting level. Toggle Raiments of the Eye for +60% rune output.</p>
+
+        <div class="controls">
+          <label>
+            Runecraft level
+            <input type="number" id="rc-level" min="1" max="99" value="99">
+          </label>
+
+          <label>
+            Filter rune
+            <select id="rune-filter">
+              <option value="all">All runes</option>
+            </select>
+          </label>
+
+          <label class="toggle">
+            <input type="checkbox" id="eye-toggle">
+            Raiments of the Eye (full set, +60%)
+          </label>
+
+          <label>
+            Essences / hour
+            <input type="number" id="essences-hour" min="100" max="10000" value="2000" step="100">
+          </label>
+        </div>
+
+        <div class="status" id="profit-status">Loading prices…</div>
+        <table class="data-table" id="profit-table">
+          <thead>
+            <tr>
+              <th>Rune</th>
+              <th>Req</th>
+              <th>Runes / ess</th>
+              <th>GP / ess</th>
+              <th>GP / hour</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      Prices via <a href="https://oldschool.runescape.wiki/w/RuneScape:Real-time_Prices" target="_blank" rel="noopener">OSRS Wiki</a>.
+      Not affiliated with Jagex.
+    </footer>
+  </div>
+
+  <script src="/js/runes.js"></script>
+  <script src="/js/calc.js"></script>
+  <script src="/js/glossary.js"></script>
+  <script src="/js/profit.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
