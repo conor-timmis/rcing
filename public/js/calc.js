@@ -270,3 +270,171 @@ function combinationProfitRow(combo, options, prices) {
     gpHour: profitPerHour(estimate.profit, options.essencesPerHour),
   };
 }
+
+function interpolateGotrXp(rcLevel) {
+  const tiers = GOTR_XP_TIERS;
+  if (rcLevel <= tiers[0].level) return tiers[0].xpPerHour;
+  if (rcLevel >= tiers[tiers.length - 1].level) return tiers[tiers.length - 1].xpPerHour;
+
+  for (let i = 0; i < tiers.length - 1; i += 1) {
+    const low = tiers[i];
+    const high = tiers[i + 1];
+    if (rcLevel >= low.level && rcLevel <= high.level) {
+      const t = (rcLevel - low.level) / (high.level - low.level);
+      return low.xpPerHour + t * (high.xpPerHour - low.xpPerHour);
+    }
+  }
+
+  return tiers[tiers.length - 1].xpPerHour;
+}
+
+function gotrXpPerHour(options) {
+  let xp = interpolateGotrXp(options.rcLevel);
+  if (options.lantern) xp *= 1.05;
+  if (options.boostedRates) xp *= 1.02;
+  return Math.round(xp);
+}
+
+function gotrRewardSearchesPerHour(options) {
+  const searchesPerGame = Math.min(
+    Math.max(0, options.elementalPoints),
+    Math.max(0, options.catalyticPoints),
+  );
+  return searchesPerGame * Math.max(0, options.gamesPerHour);
+}
+
+function gotrRuneQuantity(entry, rcLevel) {
+  const avg = (entry.qtyMin + entry.qtyMax) / 2;
+  if (rcLevel >= entry.reqLevel) return avg;
+  return avg * (rcLevel / entry.reqLevel);
+}
+
+function gotrExpectedPerSearch(entry, tableWeight, rcLevel, prices) {
+  const chance = entry.weight / tableWeight;
+  let qty = (entry.qtyMin + entry.qtyMax) / 2;
+  if (entry.reqLevel != null) qty = gotrRuneQuantity(entry, rcLevel);
+
+  const price = getItemPrice(prices, entry.itemId);
+  const gp = price != null ? qty * price * chance : null;
+
+  return {
+    name: gotrRewardName(entry),
+    itemId: entry.itemId,
+    chance,
+    qtyPerSearch: qty * chance,
+    gpPerSearch: gp,
+  };
+}
+
+function gotrTalismanExpected(tableWeight, rcLevel, prices) {
+  const tableChance = GOTR_TALISMAN_TABLE.weight / tableWeight;
+  const innerWeight = tableWeight === GOTR_TABLE_WEIGHT.boosted ? 4375 : 4900;
+  const rows = [];
+
+  for (const item of GOTR_TALISMAN_TABLE.items) {
+    if (item.reqLevel != null && rcLevel < item.reqLevel) continue;
+
+    const chance = tableChance * (item.weight / innerWeight);
+    const price = getItemPrice(prices, item.itemId);
+    const gpPerSearch = price != null ? price * chance : null;
+
+    rows.push({
+      name: gotrRewardName({ itemId: item.itemId }),
+      itemId: item.itemId,
+      chance,
+      qtyPerSearch: chance,
+      gpPerSearch,
+    });
+  }
+
+  return rows;
+}
+
+function gotrRareExpected(prices) {
+  return GOTR_RARE_REWARDS.map((entry) => {
+    const price = getItemPrice(prices, entry.itemId);
+    return {
+      name: entry.name,
+      itemId: entry.itemId,
+      chance: entry.rate,
+      qtyPerSearch: entry.rate,
+      gpPerSearch: price != null ? price * entry.rate : null,
+    };
+  });
+}
+
+function gotrComboCostsPerHour(prices) {
+  let total = 0;
+
+  for (const item of GOTR_NPC_CONTACT_COSTS) {
+    const price = getItemPrice(prices, item.itemId);
+    if (price == null) return null;
+    total += price * item.qty * GOTR_NPC_CONTACT_CASTS;
+  }
+
+  for (const item of MAGIC_IMBUE_COSTS) {
+    const price = getItemPrice(prices, item.itemId);
+    if (price == null) return null;
+    total += price * item.qty * GOTR_MAGIC_IMBUE_CASTS;
+  }
+
+  const necklacePrice = getItemPrice(prices, ITEM_IDS.bindingNecklace);
+  if (necklacePrice == null) return null;
+  total += necklacePrice * GOTR_BINDING_NECKLACES;
+
+  return total;
+}
+
+function gotrRewardBreakdown(options, prices) {
+  const tableWeight = options.boostedRates
+    ? GOTR_TABLE_WEIGHT.boosted
+    : GOTR_TABLE_WEIGHT.standard;
+
+  const rows = GOTR_MAIN_REWARDS.map((entry) =>
+    gotrExpectedPerSearch(entry, tableWeight, options.rcLevel, prices),
+  );
+
+  rows.push(...gotrTalismanExpected(tableWeight, options.rcLevel, prices));
+  rows.push(...gotrRareExpected(prices));
+
+  const merged = new Map();
+  for (const row of rows) {
+    const key = row.itemId ?? row.name;
+    const existing = merged.get(key);
+    if (existing) {
+      existing.chance += row.chance;
+      existing.qtyPerSearch += row.qtyPerSearch;
+      if (existing.gpPerSearch != null && row.gpPerSearch != null) {
+        existing.gpPerSearch += row.gpPerSearch;
+      } else {
+        existing.gpPerSearch = null;
+      }
+    } else {
+      merged.set(key, { ...row });
+    }
+  }
+
+  return [...merged.values()].sort((a, b) => (b.gpPerSearch ?? 0) - (a.gpPerSearch ?? 0));
+}
+
+function gotrSummary(options, prices) {
+  const searchesPerHour = gotrRewardSearchesPerHour(options);
+  const rows = gotrRewardBreakdown(options, prices);
+  const gpPerSearch = rows.reduce((sum, row) => sum + (row.gpPerSearch ?? 0), 0);
+  const grossGpHour = Math.round(gpPerSearch * searchesPerHour);
+  const comboCosts = options.comboRunes ? gotrComboCostsPerHour(prices) : 0;
+  const netGpHour = comboCosts != null ? grossGpHour - comboCosts : null;
+  const endGameXpPerHour = Math.round(options.rcLevel * 45 * options.gamesPerHour);
+  const rcXpPerHour = gotrXpPerHour(options);
+
+  return {
+    searchesPerHour,
+    rcXpPerHour,
+    endGameXpPerHour,
+    grossGpHour,
+    comboCosts,
+    netGpHour,
+    gpPerSearch,
+    rows,
+  };
+}
