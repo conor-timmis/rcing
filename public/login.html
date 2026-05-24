@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin login — rcing.net</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <a href="/" class="logo">
+        <img src="https://oldschool.runescape.wiki/images/Runecraft_icon.png" alt="" width="28" height="28">
+        <span class="logo-text">rcing.net</span>
+      </a>
+    </header>
+
+    <main class="content auth-content">
+      <h1 class="page-title">Admin login</h1>
+      <p class="panel-note">Sign in to view and manage submitted issues.</p>
+
+      <section class="auth-panel auth-panel-narrow">
+        <form id="login-form" class="stack-form">
+          <label>
+            Username
+            <input type="text" id="login-username" autocomplete="username" required>
+          </label>
+          <label>
+            Password
+            <input type="password" id="login-password" autocomplete="current-password" required>
+          </label>
+          <button type="submit" class="btn">Sign in</button>
+        </form>
+      </section>
+
+      <div class="status" id="auth-status"></div>
+    </main>
+
+    <footer class="site-footer">
+      rcing.net 2026 · <a href="/issues">Report an issue</a> · <a href="/login">Admin login</a>
+    </footer>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const nextPath = params.get("next") || "/admin";
+    const status = document.getElementById("auth-status");
+
+    function showError(message) {
+      status.textContent = message;
+      status.classList.add("status-error");
+    }
+
+    document.getElementById("login-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      status.classList.remove("status-error");
+      status.textContent = "Signing in…";
+
+      try {
+        await login(
+          document.getElementById("login-username").value,
+          document.getElementById("login-password").value,
+        );
+        window.location.href = nextPath;
+      } catch (err) {
+        showError(err.message);
+      }
+    });
+
+    (async () => {
+      const { user } = await fetchMe();
+      if (user?.role === "admin") {
+        window.location.href = nextPath;
+      }
+    })();
+  </script>
+</body>
+</html>

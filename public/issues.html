@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report an issue — rcing.net</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <a href="/" class="logo">
+        <img src="https://oldschool.runescape.wiki/images/Runecraft_icon.png" alt="" width="28" height="28">
+        <span class="logo-text">rcing.net</span>
+      </a>
+    </header>
+
+    <main class="content auth-content">
+      <h1 class="page-title">Report an issue</h1>
+      <p class="panel-note">Found a bug, bad number, or missing feature? Send it in. No login required.</p>
+
+      <section class="auth-panel">
+        <form id="issue-form" class="stack-form">
+          <label>
+            Name <small>(optional)</small>
+            <input type="text" id="issue-name" maxlength="64" placeholder="Leave blank to submit as anonymous">
+          </label>
+          <label>
+            Issue
+            <textarea id="issue-body" rows="8" maxlength="5000" required placeholder="Describe the problem or suggestion…"></textarea>
+          </label>
+          <button type="submit" class="btn">Submit</button>
+        </form>
+      </section>
+
+      <div class="status" id="issue-status"></div>
+    </main>
+
+    <footer class="site-footer">
+      rcing.net 2026 · <a href="/issues">Report an issue</a> · <a href="/login">Admin login</a>
+    </footer>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    const status = document.getElementById("issue-status");
+
+    function showStatus(message, isError = false) {
+      status.textContent = message;
+      status.classList.toggle("status-error", isError);
+    }
+
+    document.getElementById("issue-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      showStatus("Submitting…");
+
+      try {
+        await submitIssue(
+          document.getElementById("issue-name").value,
+          document.getElementById("issue-body").value,
+        );
+        document.getElementById("issue-form").reset();
+        showStatus("Thanks — your issue was submitted.");
+      } catch (err) {
+        showStatus(err.message, true);
+      }
+    });
+  </script>
+</body>
+</html>

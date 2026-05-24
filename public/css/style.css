@@ -268,6 +268,144 @@ a {
   color: #8b7355;
 }
 
+.site-footer a {
+  color: #c8a84b;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: normal;
+  color: #f0e6d2;
+}
+
+.auth-content {
+  margin-top: 20vh;
+  min-height: 420px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-label {
+  color: #b8a88a;
+  font-size: 0.85rem;
+}
+
+.auth-panel {
+  border: 1px solid #6b5a3e;
+  background: rgba(43, 36, 25, 0.35);
+  padding: 16px;
+}
+
+.auth-panel-narrow {
+  max-width: 420px;
+}
+
+.stack-form label small {
+  color: #8b7355;
+  font-weight: normal;
+}
+
+.stack-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stack-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #b8a88a;
+}
+
+.stack-form input,
+.stack-form textarea {
+  background: #2b2419;
+  border: 1px solid #6b5a3e;
+  border-radius: 2px;
+  color: #f0e6d2;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 8px 10px;
+}
+
+.stack-form textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+.btn {
+  display: inline-block;
+  background: #2b2419;
+  border: 1px solid #8b7355;
+  color: #f0e6d2;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: #3d3428;
+  color: #f0e6d2;
+}
+
+.btn-secondary {
+  color: #c8a84b;
+}
+
+.btn-small {
+  font-size: 0.85rem;
+  padding: 4px 10px;
+}
+
+.status-error {
+  color: #c66;
+}
+
+.issue-body-preview {
+  margin-top: 6px;
+  color: #b8a88a;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+}
+
+.action-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.btn-complete {
+  color: #6b8;
+  border-color: #4a6b4a;
+}
+
+.btn-delete {
+  color: #c66;
+  border-color: #6b4a4a;
+}
+
 @media (max-width: 640px) {
   .tab-nav {
     margin-top: 10vh;

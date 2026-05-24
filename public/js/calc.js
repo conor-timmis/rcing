@@ -424,13 +424,11 @@ function gotrSummary(options, prices) {
   const grossGpHour = Math.round(gpPerSearch * searchesPerHour);
   const comboCosts = options.comboRunes ? gotrComboCostsPerHour(prices) : 0;
   const netGpHour = comboCosts != null ? grossGpHour - comboCosts : null;
-  const endGameXpPerHour = Math.round(options.rcLevel * 45 * options.gamesPerHour);
   const rcXpPerHour = gotrXpPerHour(options);
 
   return {
     searchesPerHour,
     rcXpPerHour,
-    endGameXpPerHour,
     grossGpHour,
     comboCosts,
     netGpHour,
