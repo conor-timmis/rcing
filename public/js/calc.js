@@ -87,6 +87,45 @@ function profitPerHour(profitPerEss, essencesHour) {
   return Math.round(profitPerEss * essencesHour);
 }
 
+function standardPouchSummary(rcLevel) {
+  const pouches = STANDARD_POUCHES.filter((pouch) => rcLevel >= pouch.reqLevel);
+  const capacity = pouches.reduce((sum, pouch) => sum + pouch.capacity, 0);
+  const slots = pouches.length;
+
+  return {
+    name: pouches.length ? pouches.map((pouch) => pouch.name).join(", ") : "No pouches",
+    essencesPerTrip: 28 - slots + capacity,
+  };
+}
+
+function colossalPouchSummary(rcLevel) {
+  const tier = COLOSSAL_POUCH_TIERS.find((t) => rcLevel >= t.reqLevel);
+  if (!tier) {
+    return { name: "Colossal pouch unavailable", essencesPerTrip: 28 };
+  }
+
+  return {
+    name: `Colossal pouch (${tier.capacity})`,
+    essencesPerTrip: 28 - 1 + tier.capacity,
+  };
+}
+
+function pouchSummary(setupId, rcLevel, manualEssencesPerTrip) {
+  if (setupId === "standard") return standardPouchSummary(rcLevel);
+  if (setupId === "colossal") return colossalPouchSummary(rcLevel);
+  if (setupId === "manual") {
+    return {
+      name: "Manual",
+      essencesPerTrip: Math.max(1, manualEssencesPerTrip || 1),
+    };
+  }
+  return { name: "Inventory only", essencesPerTrip: 28 };
+}
+
+function recommendedAbyssSetup(rcLevel) {
+  return rcLevel >= 85 ? "colossal" : "standard";
+}
+
 function totalItemCost(prices, items) {
   let cost = 0;
   for (const item of items) {
@@ -183,4 +222,51 @@ function bestCombinationRoute(combo, options, prices) {
   return combo.routes
     .map((route) => combinationRouteProfit(combo, route, options, prices))
     .sort((a, b) => (b.profit ?? -Infinity) - (a.profit ?? -Infinity))[0];
+}
+
+function normalProfitRow(rune, options, prices) {
+  const { base, total, profit, cost } = profitPerEssence(
+    rune,
+    options.rcLevel,
+    options.eyeEnabled,
+    prices,
+  );
+  const runePrice = getItemPrice(prices, rune.itemId);
+  const canCraft = options.rcLevel >= rune.reqLevel;
+  const eyeNote = options.eyeEnabled && base > 0 ? ` (${base}→${total})` : "";
+
+  return {
+    rune,
+    canCraft,
+    method: rune.note ?? "Standard altar",
+    price: runePrice,
+    outputPerEssence: canCraft ? `${total}${eyeNote}` : null,
+    cost,
+    profit,
+    gpHour: profitPerHour(profit, options.essencesPerHour),
+  };
+}
+
+function combinationProfitRow(combo, options, prices) {
+  const estimate = bestCombinationRoute(combo, options, prices);
+  const route = estimate.route;
+  const canCraft = options.rcLevel >= combo.reqLevel;
+  const extraInputs = route.successCosts?.map((item) => item.name) ?? [];
+  const routeInputs = [route.inputName, ...extraInputs].join(" + ");
+  const method =
+    options.magicImbue || route.requiresMagicImbue
+      ? `${route.altar} with ${routeInputs}`
+      : `${route.altar} with ${routeInputs} + ${route.talismanName}`;
+
+  return {
+    rune: combo,
+    canCraft,
+    method,
+    price: estimate.runePrice,
+    outputPerEssence:
+      estimate.outputPerEssence != null ? estimate.outputPerEssence.toFixed(1) : null,
+    cost: estimate.cost,
+    profit: estimate.profit,
+    gpHour: profitPerHour(estimate.profit, options.essencesPerHour),
+  };
 }

@@ -7,12 +7,33 @@ function renderProfit(prices) {
 
   const rcLevel = parseInt(document.getElementById("rc-level").value, 10) || 1;
   const eyeEnabled = document.getElementById("eye-toggle").checked;
-  const essHour = parseInt(document.getElementById("essences-hour").value, 10) || 2000;
+  const pouchSetup = document.getElementById("pouch-setup").value;
+  const tripsHour = parseInt(document.getElementById("trips-hour").value, 10) || 50;
+  const manualEssencesPerTrip =
+    parseInt(document.getElementById("essences-trip").value, 10) || 1;
+  const bindingNecklace = document.getElementById("combo-binding-toggle").checked;
+  const magicImbue = document.getElementById("combo-imbue-toggle").checked;
+  const pouch = pouchSummary(pouchSetup, rcLevel, manualEssencesPerTrip);
+  const essencesPerHour = pouch.essencesPerTrip * tripsHour;
 
-  for (const rune of RUNES) {
-    const { base, total, profit } = profitPerEssence(rune, rcLevel, eyeEnabled, prices);
-    const gph = profitPerHour(profit, essHour);
-    const canCraft = rcLevel >= rune.reqLevel;
+  document.getElementById("essences-trip").disabled = pouchSetup !== "manual";
+
+  const options = {
+    rcLevel,
+    eyeEnabled,
+    bindingNecklace,
+    magicImbue,
+    essencesPerAction: pouch.essencesPerTrip,
+    essencesPerHour,
+  };
+
+  const rows = [
+    ...RUNES.map((rune) => normalProfitRow(rune, options, prices)),
+    ...COMBINATION_RUNES.map((combo) => combinationProfitRow(combo, options, prices)),
+  ];
+
+  for (const row of rows) {
+    const { rune, canCraft, profit, gpHour } = row;
 
     const tr = document.createElement("tr");
     if (!canCraft) tr.classList.add("unavailable");
@@ -20,9 +41,7 @@ function renderProfit(prices) {
     const gpClass =
       profit != null ? (profit >= 0 ? "gp-positive" : "gp-negative") : "";
     const gphClass =
-      gph != null ? (gph >= 0 ? "gp-positive" : "gp-negative") : "";
-
-    const eyeNote = eyeEnabled && base > 0 ? ` (${base}→${total})` : "";
+      gpHour != null ? (gpHour >= 0 ? "gp-positive" : "gp-negative") : "";
 
     const profitCell =
       canCraft && profit != null
@@ -39,27 +58,60 @@ function renderProfit(prices) {
         </span>
       </td>
       <td>${rune.reqLevel}</td>
-      <td>${canCraft ? total + eyeNote : "—"}</td>
+      <td>${row.method}</td>
+      <td>${formatGp(row.price)}</td>
+      <td>${canCraft ? row.outputPerEssence ?? "—" : "—"}</td>
       <td class="${gpClass}">${profitCell}</td>
-      <td class="${gphClass}">${canCraft && gph != null ? formatGp(gph) : "—"}</td>
+      <td class="${gphClass}">${canCraft && gpHour != null ? formatGp(gpHour) : "—"}</td>
     `;
     tbody.appendChild(tr);
   }
 
   const eyeLabel = eyeEnabled ? " · Eye set ON" : "";
-  status.textContent = `Level ${rcLevel}${eyeLabel} · ${essHour.toLocaleString()} ess/hr`;
+  const comboLabel = bindingNecklace ? " · Binding necklace ON" : " · 50% combo success";
+  const imbueLabel = magicImbue ? " · Magic Imbue ON" : "";
+  status.textContent = `Level ${rcLevel}${eyeLabel}${comboLabel}${imbueLabel} · ${pouch.name} · ${pouch.essencesPerTrip.toLocaleString()} ess/trip × ${tripsHour.toLocaleString()} trips/hr = ${essencesPerHour.toLocaleString()} ess/hr`;
 }
 
 function bindProfitControls() {
-  const inputs = ["rc-level", "eye-toggle", "essences-hour"];
+  const inputs = [
+    "rc-level",
+    "eye-toggle",
+    "abyss-recommended-toggle",
+    "pouch-setup",
+    "trips-hour",
+    "essences-trip",
+    "combo-binding-toggle",
+    "combo-imbue-toggle",
+  ];
   for (const id of inputs) {
     document.getElementById(id).addEventListener("input", () => {
+      applyAbyssRecommendation(id);
       if (cachedPrices) renderProfit(cachedPrices);
     });
     document.getElementById(id).addEventListener("change", () => {
+      applyAbyssRecommendation(id);
       if (cachedPrices) renderProfit(cachedPrices);
     });
   }
+}
+
+function applyAbyssRecommendation(changedId) {
+  const toggle = document.getElementById("abyss-recommended-toggle");
+  if (!toggle.checked) return;
+
+  if (
+    !["abyss-recommended-toggle", "rc-level"].includes(changedId) &&
+    changedId !== "eye-toggle"
+  ) {
+    toggle.checked = false;
+    return;
+  }
+
+  const rcLevel = parseInt(document.getElementById("rc-level").value, 10) || 1;
+  document.getElementById("pouch-setup").value = recommendedAbyssSetup(rcLevel);
+  document.getElementById("trips-hour").value = 50;
+  document.getElementById("eye-toggle").checked = true;
 }
 
 async function loadProfit(initialPrices = null) {

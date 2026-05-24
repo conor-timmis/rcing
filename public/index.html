@@ -19,7 +19,6 @@
     <nav class="tab-nav" role="tablist">
       <button class="tab active" role="tab" data-tab="glossary" aria-selected="true">Glossary</button>
       <button class="tab" role="tab" data-tab="profit" aria-selected="false">Profit</button>
-      <button class="tab" role="tab" data-tab="combination" aria-selected="false">Combination runes</button>
     </nav>
 
     <main class="content">
@@ -39,7 +38,7 @@
       </section>
 
       <section id="panel-profit" class="panel" role="tabpanel" hidden>
-        <p class="panel-note">Profit per essence at your Runecrafting level. Toggle Raiments of the Eye for +60% rune output.</p>
+        <p class="panel-note">Profit per essence and per hour. Abyss presets use researched pouch capacities and 50 trips/hour by default.</p>
 
         <div class="controls">
           <label>
@@ -52,39 +51,29 @@
             Raiments of the Eye (full set, +60%)
           </label>
 
-          <label>
-            Essences / hour
-            <input type="number" id="essences-hour" min="100" max="10000" value="2000" step="100">
-          </label>
-        </div>
-
-        <div class="status" id="profit-status">Loading prices…</div>
-        <table class="data-table" id="profit-table">
-          <thead>
-            <tr>
-              <th>Rune</th>
-              <th>Level req</th>
-              <th>Runes / ess</th>
-              <th>GP / ess</th>
-              <th>GP / hour</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </section>
-
-      <section id="panel-combination" class="panel" role="tabpanel" hidden>
-        <p class="panel-note">Best combination-rune recipe from live prices. Binding necklace gives 100% success; Magic Imbue removes elemental talismans. Aether always includes Magic Imbue and catalyst cost.</p>
-
-        <div class="controls">
-          <label>
-            Runecraft level
-            <input type="number" id="combo-rc-level" min="1" max="99" value="99">
+          <label class="toggle">
+            <input type="checkbox" id="abyss-recommended-toggle">
+            Recommended for Abyss
           </label>
 
           <label>
-            Essences / action
-            <input type="number" id="combo-essences-action" min="1" max="200" value="26" step="1">
+            Pouch setup
+            <select id="pouch-setup">
+              <option value="inventory">Inventory only</option>
+              <option value="standard">Best standard pouches</option>
+              <option value="colossal">Colossal pouch</option>
+              <option value="manual">Manual essences / trip</option>
+            </select>
+          </label>
+
+          <label>
+            Trips / hour
+            <input type="number" id="trips-hour" min="1" max="120" value="50" step="1">
+          </label>
+
+          <label>
+            Essences / trip
+            <input type="number" id="essences-trip" min="1" max="200" value="67" step="1">
           </label>
 
           <label class="toggle">
@@ -98,18 +87,17 @@
           </label>
         </div>
 
-        <div class="status" id="combination-status">Loading prices…</div>
-        <table class="data-table" id="combination-table">
+        <div class="status" id="profit-status">Loading prices…</div>
+        <table class="data-table" id="profit-table">
           <thead>
             <tr>
               <th>Rune</th>
               <th>Level req</th>
-              <th>Price</th>
               <th>Method</th>
-              <th>Cost / ess</th>
+              <th>Price</th>
               <th>Runes / ess</th>
               <th>GP / ess</th>
-              <th>GP / action</th>
+              <th>GP / hour</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -126,7 +114,6 @@
   <script src="/js/calc.js"></script>
   <script src="/js/glossary.js"></script>
   <script src="/js/profit.js"></script>
-  <script src="/js/combination.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>

@@ -193,6 +193,27 @@ const MAGIC_IMBUE_COSTS = [
   { itemId: ITEM_IDS.waterRune, qty: 7, name: "Water rune" },
 ];
 
+const POUCH_SETUPS = [
+  { id: "inventory", name: "Inventory only" },
+  { id: "standard", name: "Best standard pouches" },
+  { id: "colossal", name: "Colossal pouch" },
+  { id: "manual", name: "Manual essences / trip" },
+];
+
+const STANDARD_POUCHES = [
+  { name: "Small pouch", reqLevel: 1, capacity: 3 },
+  { name: "Medium pouch", reqLevel: 25, capacity: 6 },
+  { name: "Large pouch", reqLevel: 50, capacity: 9 },
+  { name: "Giant pouch", reqLevel: 75, capacity: 12 },
+];
+
+const COLOSSAL_POUCH_TIERS = [
+  { reqLevel: 85, capacity: 40 },
+  { reqLevel: 75, capacity: 27 },
+  { reqLevel: 50, capacity: 16 },
+  { reqLevel: 25, capacity: 8 },
+];
+
 const COMBINATION_RUNES = [
   {
     id: "mist",

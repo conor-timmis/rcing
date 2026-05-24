@@ -18,5 +18,4 @@ document.querySelectorAll(".tab").forEach((tab) => {
 (async () => {
   const prices = await loadGlossary();
   await loadProfit(prices);
-  await loadCombinationRunes(prices);
 })();
