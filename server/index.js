@@ -1,5 +1,8 @@
 const express = require("express");
 const path = require("path");
+const session = require("express-session");
+const { router: authRouter, seedAdminUser } = require("./auth");
+const { router: issuesRouter } = require("./issues");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,6 +64,21 @@ function midPrice(entry) {
   return high ?? low ?? null;
 }
 
+app.use(express.json());
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "rcing-dev-session-secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    },
+  }),
+);
+
 app.get("/api/prices", async (_req, res) => {
   try {
     const { latest, day } = await getPrices();
@@ -87,11 +105,36 @@ app.get("/api/prices/:id", async (req, res) => {
   }
 });
 
+app.use("/api/auth", authRouter);
+app.use("/api/issues", issuesRouter);
+
 app.get("/.well-known/discord", (_req, res) => {
   res.type("text/plain").send("dh=bc6d779eb639f1d2323c7d718dcc43260cf7ea7b");
 });
 
-app.use(express.static(path.join(__dirname, "..", "public")));
+const publicDir = path.join(__dirname, "..", "public");
+
+const pages = {
+  "/": "index.html",
+  "/issues": "issues.html",
+  "/login": "login.html",
+  "/admin": "admin.html",
+};
+
+for (const [route, file] of Object.entries(pages)) {
+  app.get(route, (_req, res) => {
+    res.sendFile(path.join(publicDir, file));
+  });
+}
+
+app.get("/issues.html", (_req, res) => res.redirect(301, "/issues"));
+app.get("/login.html", (_req, res) => res.redirect(301, "/login"));
+app.get("/admin.html", (_req, res) => res.redirect(301, "/admin"));
+app.get("/index.html", (_req, res) => res.redirect(301, "/"));
+
+app.use(express.static(publicDir));
+
+seedAdminUser();
 
 app.listen(PORT, () => {
   console.log(`rcing.net listening on http://localhost:${PORT}`);
