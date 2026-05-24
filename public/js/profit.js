@@ -1,4 +1,5 @@
 let cachedPrices = null;
+let profitControlsBound = false;
 
 function renderProfit(prices) {
   const tbody = document.querySelector("#profit-table tbody");
@@ -74,6 +75,9 @@ function renderProfit(prices) {
 }
 
 function bindProfitControls() {
+  if (profitControlsBound) return;
+  profitControlsBound = true;
+
   const inputs = [
     "rc-level",
     "eye-toggle",

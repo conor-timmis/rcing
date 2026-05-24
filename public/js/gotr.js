@@ -1,4 +1,5 @@
 let gotrCachedPrices = null;
+let gotrControlsBound = false;
 
 function formatChance(rate) {
   if (rate >= 0.01) return `${(rate * 100).toFixed(1)}%`;
@@ -87,6 +88,9 @@ function renderGotr(prices) {
 }
 
 function bindGotrControls() {
+  if (gotrControlsBound) return;
+  gotrControlsBound = true;
+
   const ids = [
     "gotr-rc-level",
     "gotr-games-hour",

@@ -38,8 +38,13 @@ function renderGlossary(prices) {
   status.textContent = `Updated ${when}`;
 }
 
-async function loadGlossary() {
+async function loadGlossary(initialPrices = null) {
   const status = document.getElementById("glossary-status");
+  if (initialPrices) {
+    renderGlossary(initialPrices);
+    return initialPrices;
+  }
+
   try {
     const res = await fetch("/api/prices");
     if (!res.ok) throw new Error("API error");
