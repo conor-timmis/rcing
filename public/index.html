@@ -19,6 +19,7 @@
     <nav class="tab-nav" role="tablist">
       <button class="tab active" role="tab" data-tab="glossary" aria-selected="true">Glossary</button>
       <button class="tab" role="tab" data-tab="profit" aria-selected="false">Profit</button>
+      <button class="tab" role="tab" data-tab="zmi" aria-selected="false">ZMI</button>
       <button class="tab" role="tab" data-tab="gotr" aria-selected="false">GOTR</button>
     </nav>
 
@@ -102,6 +103,81 @@
               <th>Method</th>
               <th>Price</th>
               <th>Runes / ess</th>
+              <th>GP / ess</th>
+              <th>GP / hour</th>
+              <th>RC XP / hour</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section id="panel-zmi" class="panel" role="tabpanel" hidden>
+        <p class="panel-note">Ourania (ZMI) altar expected rewards and XP. Rune rates from the OSRS Wiki; prices are live GE. Excludes daeyalt mining time, pouch repair GP, and stamina costs. Daeyalt essence is untradeable — profit uses pure essence cost unless daeyalt mode (XP boost only). Ardougne diary uses wiki-average ~22.5% rune output boost.</p>
+
+        <div class="controls profit-controls">
+          <fieldset class="control-group">
+            <legend>Character</legend>
+            <label>
+              Runecraft level
+              <input type="number" id="zmi-rc-level" min="1" max="99" value="1">
+            </label>
+
+            <label class="toggle">
+              <input type="checkbox" id="zmi-eye-toggle">
+              Raiments of the Eye
+            </label>
+
+            <label class="toggle">
+              <input type="checkbox" id="zmi-daeyalt-toggle">
+              Daeyalt essence (XP only)
+            </label>
+
+            <label class="toggle">
+              <input type="checkbox" id="zmi-diary-toggle">
+              Ardougne medium diary
+            </label>
+          </fieldset>
+
+          <fieldset class="control-group">
+            <legend>Throughput</legend>
+            <label>
+              Pouch setup
+              <select id="zmi-pouch-setup">
+                <option value="inventory">Inventory only</option>
+                <option value="standard">Best standard pouches</option>
+                <option value="colossal">Colossal pouch</option>
+                <option value="manual">Manual essences / trip</option>
+              </select>
+            </label>
+
+            <label>
+              Seconds / trip
+              <input type="number" id="zmi-trip-seconds" min="30" max="300" value="48" step="1">
+            </label>
+
+            <label>
+              Essences / trip
+              <input type="number" id="zmi-essences-trip" min="1" max="200" value="1" step="1" disabled>
+            </label>
+          </fieldset>
+
+          <fieldset class="control-group">
+            <legend>Costs</legend>
+            <label class="toggle">
+              <input type="checkbox" id="zmi-supply-costs-toggle" checked>
+              Include teleport + banking costs
+            </label>
+          </fieldset>
+        </div>
+
+        <div class="status" id="zmi-status">Loading prices…</div>
+        <table class="data-table" id="zmi-table">
+          <thead>
+            <tr>
+              <th>Rune</th>
+              <th>Chance / ess</th>
+              <th>Qty / ess</th>
               <th>GP / ess</th>
               <th>GP / hour</th>
             </tr>
