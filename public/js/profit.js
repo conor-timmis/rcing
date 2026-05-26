@@ -4,8 +4,10 @@ let profitControlsBound = false;
 const PROFIT_PRESET_FIELDS = [
   { id: "rc-level", type: "int" },
   { id: "eye-toggle", type: "bool" },
+  { id: "daeyalt-toggle", type: "bool" },
+  { id: "rc-cape-toggle", type: "bool" },
   { id: "pouch-setup", type: "select" },
-  { id: "trips-hour", type: "int" },
+  { id: "trip-seconds", type: "int" },
   { id: "essences-trip", type: "int" },
   { id: "combo-binding-toggle", type: "bool" },
   { id: "combo-imbue-toggle", type: "bool" },
@@ -27,30 +29,39 @@ function profitCellContent(row) {
 function profitOptionsFromForm() {
   const rcLevel = readClampedInput("rc-level", 1, LEVEL_MAX, 1);
   const eyeEnabled = document.getElementById("eye-toggle").checked;
+  const daeyalt = document.getElementById("daeyalt-toggle").checked;
+  const rcCape = document.getElementById("rc-cape-toggle").checked;
   const pouchSetup = document.getElementById("pouch-setup").value;
-  const tripsHour = readClampedInput("trips-hour", 1, INPUT_MAX, 1);
+  const tripSeconds = readClampedInput("trip-seconds", 1, INPUT_MAX, PROFIT_DEFAULT_TRIP_SECONDS);
   const manualEssencesPerTrip = readClampedInput("essences-trip", 1, INPUT_MAX, 1);
   const bindingNecklace = document.getElementById("combo-binding-toggle").checked;
   const magicImbue = document.getElementById("combo-imbue-toggle").checked;
-  const pouch = pouchSummary(pouchSetup, rcLevel, manualEssencesPerTrip);
+  const pouch = pouchSummary(pouchSetup, rcLevel, manualEssencesPerTrip, rcCape);
+  const tripsHour = profitTripsPerHour(tripSeconds, rcLevel, pouchSetup, rcCape);
+  const essencesPerHour = Math.round(pouch.essencesPerTrip * tripsHour);
 
   document.getElementById("essences-trip").disabled = pouchSetup !== "manual";
 
   return {
     rcLevel,
     eyeEnabled,
+    daeyalt,
+    rcCape,
     bindingNecklace,
     magicImbue,
+    tripSeconds,
     tripsHour,
     pouch,
-    essencesPerHour: pouch.essencesPerTrip * tripsHour,
+    essencesPerHour,
     calcOptions: {
       rcLevel,
       eyeEnabled,
+      daeyalt,
+      rcCape,
       bindingNecklace,
       magicImbue,
       essencesPerAction: pouch.essencesPerTrip,
-      essencesPerHour: pouch.essencesPerTrip * tripsHour,
+      essencesPerHour,
     },
   };
 }
@@ -62,6 +73,8 @@ function bestProfitLabel(bestRow) {
 
 function profitStatusText(form, bestRow) {
   const eyeLabel = form.eyeEnabled ? " · Eye set ON" : "";
+  const daeyaltLabel = form.daeyalt ? " · Daeyalt essence" : "";
+  const capeLabel = form.rcCape ? " · RC cape" : "";
   const comboLabel = form.bindingNecklace
     ? " · Binding necklace ON"
     : " · 50% combo success";
@@ -69,9 +82,10 @@ function profitStatusText(form, bestRow) {
 
   return (
     `${bestProfitLabel(bestRow)} · ` +
-    `Level ${form.rcLevel}${eyeLabel}${comboLabel}${imbueLabel}` +
+    `Level ${form.rcLevel}${eyeLabel}${daeyaltLabel}${capeLabel}${comboLabel}${imbueLabel}` +
     ` · ${form.pouch.name} · ${form.pouch.essencesPerTrip.toLocaleString()} ess/trip` +
-    ` × ${form.tripsHour.toLocaleString()} trips/hr = ${form.essencesPerHour.toLocaleString()} ess/hr`
+    ` · ${form.tripSeconds}s/trip ≈ ${form.tripsHour.toFixed(1)} trips/hr` +
+    ` = ${form.essencesPerHour.toLocaleString()} ess/hr`
   );
 }
 
@@ -121,11 +135,18 @@ function bindProfitControls() {
   };
 
   bindClampedInput("rc-level", { min: 1, max: LEVEL_MAX, fallback: 1, onUpdate });
-  bindClampedInput("trips-hour", { min: 1, max: INPUT_MAX, fallback: 1, onUpdate });
+  bindClampedInput("trip-seconds", {
+    min: 1,
+    max: INPUT_MAX,
+    fallback: PROFIT_DEFAULT_TRIP_SECONDS,
+    onUpdate,
+  });
   bindClampedInput("essences-trip", { min: 1, max: INPUT_MAX, fallback: 1, onUpdate });
 
   for (const id of [
     "eye-toggle",
+    "daeyalt-toggle",
+    "rc-cape-toggle",
     "pouch-setup",
     "combo-binding-toggle",
     "combo-imbue-toggle",

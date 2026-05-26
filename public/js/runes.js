@@ -152,7 +152,7 @@ const RUNES = [
     reqLevel: 90,
     members: true,
     multipliers: [90],
-    xp: 11,
+    xp: 29.7,
     essenceItemId: null,
     freeInput: true,
     note: "Uses dark essence fragments",
@@ -164,7 +164,7 @@ const RUNES = [
     reqLevel: 95,
     members: true,
     multipliers: [95],
-    xp: 11,
+    xp: 8,
     essenceItemId: 7936,
   },
 ];

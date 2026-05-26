@@ -2,7 +2,7 @@ const CORE_SCRIPTS = ["/js/runes.js", "/js/inputs.js", "/js/calc.js"];
 
 const TAB_SCRIPTS = {
   glossary: ["/js/glossary.js"],
-  profit: ["/js/profit.js"],
+  profit: ["/js/profit-data.js", "/js/profit.js"],
   zmi: ["/js/zmi-data.js", "/js/zmi.js"],
   gotr: ["/js/gotr-data.js", "/js/gotr.js"],
 };

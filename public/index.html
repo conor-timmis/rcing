@@ -40,43 +40,53 @@
       </section>
 
       <section id="panel-profit" class="panel" role="tabpanel" hidden>
-        <p class="panel-note">Profit per essence and per hour. Set pouch setup and trips/hour to match your run.</p>
+        <p class="panel-note">Profit and XP per essence and per hour. XP is per essence used (Eye set adds runes, not XP). Daeyalt essence grants +50% XP. Set pouch, trip time, and cape to match your run.</p>
 
         <div class="controls profit-controls">
           <fieldset class="control-group">
             <legend>Character</legend>
             <label>
               Runecraft level
-              <input type="number" id="rc-level" min="1" max="99" value="1">
+              <input type="number" id="rc-level" min="1" max="99" value="95">
             </label>
 
             <label class="toggle">
-              <input type="checkbox" id="eye-toggle">
+              <input type="checkbox" id="eye-toggle" checked>
               Raiments of the Eye
+            </label>
+
+            <label class="toggle">
+              <input type="checkbox" id="daeyalt-toggle">
+              Daeyalt essence (+50% XP)
+            </label>
+
+            <label class="toggle">
+              <input type="checkbox" id="rc-cape-toggle">
+              Runecraft cape (pouch protect, −1 ess with colossal)
             </label>
           </fieldset>
 
           <fieldset class="control-group">
-            <legend>Abyss throughput</legend>
+            <legend>Throughput</legend>
 
             <label>
               Pouch setup
               <select id="pouch-setup">
                 <option value="inventory">Inventory only</option>
                 <option value="standard">Best standard pouches</option>
-                <option value="colossal">Colossal pouch</option>
+                <option value="colossal" selected>Colossal pouch</option>
                 <option value="manual">Manual essences / trip</option>
               </select>
             </label>
 
             <label>
-              Trips / hour
-              <input type="number" id="trips-hour" min="1" max="200" value="1" step="1">
+              Seconds / trip
+              <input type="number" id="trip-seconds" min="1" max="200" value="45" step="1">
             </label>
 
             <label>
               Essences / trip
-              <input type="number" id="essences-trip" min="1" max="200" value="1" step="1">
+              <input type="number" id="essences-trip" min="1" max="200" value="67" step="1">
             </label>
           </fieldset>
 

@@ -138,32 +138,40 @@ function findBestProfitRow(rows) {
   return best;
 }
 
-function standardPouchSummary(rcLevel) {
+function standardPouchSummary(rcLevel, rcCape) {
   const pouches = STANDARD_POUCHES.filter((pouch) => rcLevel >= pouch.reqLevel);
   const capacity = pouches.reduce((sum, pouch) => sum + pouch.capacity, 0);
   const slots = pouches.length;
+  const capeLabel = rcCape ? " · RC cape" : "";
 
   return {
-    name: pouches.length ? pouches.map((pouch) => pouch.name).join(", ") : "No pouches",
+    name: pouches.length
+      ? pouches.map((pouch) => pouch.name).join(", ") + capeLabel
+      : "No pouches",
     essencesPerTrip: INVENTORY_SLOTS - slots + capacity,
   };
 }
 
-function colossalPouchSummary(rcLevel) {
+function colossalPouchSummary(rcLevel, rcCape) {
   const tier = COLOSSAL_POUCH_TIERS.find((t) => rcLevel >= t.reqLevel);
   if (!tier) {
     return { name: "Colossal pouch unavailable", essencesPerTrip: INVENTORY_SLOTS };
   }
 
+  let essencesPerTrip = INVENTORY_SLOTS - 1 + tier.capacity;
+  if (rcCape) essencesPerTrip -= PROFIT_COLOSSAL_CAPE_ESSENCE_PENALTY;
+
+  const capeLabel = rcCape ? " + RC cape" : "";
+
   return {
-    name: `Colossal pouch (${tier.capacity})`,
-    essencesPerTrip: INVENTORY_SLOTS - 1 + tier.capacity,
+    name: `Colossal pouch (${tier.capacity})${capeLabel}`,
+    essencesPerTrip,
   };
 }
 
-function pouchSummary(setupId, rcLevel, manualEssencesPerTrip) {
-  if (setupId === "standard") return standardPouchSummary(rcLevel);
-  if (setupId === "colossal") return colossalPouchSummary(rcLevel);
+function pouchSummary(setupId, rcLevel, manualEssencesPerTrip, rcCape = false) {
+  if (setupId === "standard") return standardPouchSummary(rcLevel, rcCape);
+  if (setupId === "colossal") return colossalPouchSummary(rcLevel, rcCape);
   if (setupId === "manual") {
     return {
       name: "Manual",
@@ -261,6 +269,34 @@ function bestCombinationRoute(combo, options, prices) {
     .sort((a, b) => (b.profit ?? -Infinity) - (a.profit ?? -Infinity))[0];
 }
 
+function profitTripsPerHour(tripSeconds, rcLevel, pouchSetup, rcCape) {
+  if (tripSeconds <= 0) return 0;
+
+  const baseTrips = PROFIT_SECONDS_PER_HOUR / tripSeconds;
+  if (rcCape || pouchSetup !== "standard") return baseTrips;
+
+  const lostSeconds =
+    PROFIT_NPC_CONTACT_SECONDS_PER_POUCH * zmiStandardPouchTiers(rcLevel);
+  return baseTrips * ((PROFIT_SECONDS_PER_HOUR - lostSeconds) / PROFIT_SECONDS_PER_HOUR);
+}
+
+function runeXpPerEssence(rune, daeyalt) {
+  if (rune.freeInput || rune.essenceItemId == null && !rune.extraCosts) {
+    return rune.xp;
+  }
+  if (daeyalt) return rune.xp * PROFIT_DAEYALT_XP_MULTIPLIER;
+  return rune.xp;
+}
+
+function combinationXpPerEssence(route, options) {
+  const successRate = options.bindingNecklace
+    ? COMBO_OUTPUT_WITH_NECKLACE
+    : COMBO_OUTPUT_WITHOUT_NECKLACE;
+  let xp = route.xp * successRate;
+  if (options.daeyalt) xp *= PROFIT_DAEYALT_XP_MULTIPLIER;
+  return xp;
+}
+
 function normalProfitRow(rune, options, prices) {
   const { total, profit, cost } = profitPerEssence(
     rune,
@@ -280,7 +316,9 @@ function normalProfitRow(rune, options, prices) {
     cost,
     profit,
     gpHour: profitPerHour(profit, options.essencesPerHour),
-    xpHour: canCraft ? xpPerHour(rune.xp, options.essencesPerHour) : null,
+    xpHour: canCraft
+      ? xpPerHour(runeXpPerEssence(rune, options.daeyalt), options.essencesPerHour)
+      : null,
   };
 }
 
@@ -305,7 +343,9 @@ function combinationProfitRow(combo, options, prices) {
     cost: estimate.cost,
     profit: estimate.profit,
     gpHour: profitPerHour(estimate.profit, options.essencesPerHour),
-    xpHour: canCraft ? xpPerHour(route.xp, options.essencesPerHour) : null,
+    xpHour: canCraft
+      ? xpPerHour(combinationXpPerEssence(route, options), options.essencesPerHour)
+      : null,
   };
 }
 
