@@ -262,7 +262,7 @@ function bestCombinationRoute(combo, options, prices) {
 }
 
 function normalProfitRow(rune, options, prices) {
-  const { base, total, profit, cost } = profitPerEssence(
+  const { total, profit, cost } = profitPerEssence(
     rune,
     options.rcLevel,
     options.eyeEnabled,
@@ -270,14 +270,13 @@ function normalProfitRow(rune, options, prices) {
   );
   const runePrice = getItemPrice(prices, rune.itemId);
   const canCraft = options.rcLevel >= rune.reqLevel;
-  const eyeNote = options.eyeEnabled && base > 0 ? ` (${base}→${total})` : "";
 
   return {
     rune,
     canCraft,
     method: rune.note ?? "Standard altar",
     price: runePrice,
-    outputPerEssence: canCraft ? `${total}${eyeNote}` : null,
+    outputPerEssence: canCraft ? String(total) : null,
     cost,
     profit,
     gpHour: profitPerHour(profit, options.essencesPerHour),
