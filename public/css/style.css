@@ -231,6 +231,11 @@ a {
   opacity: 0.45;
 }
 
+.data-table tbody tr.profit-best {
+  background: rgba(200, 168, 75, 0.12);
+  box-shadow: inset 3px 0 0 #c8a84b;
+}
+
 .rune-name {
   display: flex;
   align-items: center;

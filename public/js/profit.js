@@ -1,6 +1,16 @@
 let cachedPrices = null;
 let profitControlsBound = false;
 
+const PROFIT_PRESET_FIELDS = [
+  { id: "rc-level", type: "int" },
+  { id: "eye-toggle", type: "bool" },
+  { id: "pouch-setup", type: "select" },
+  { id: "trips-hour", type: "int" },
+  { id: "essences-trip", type: "int" },
+  { id: "combo-binding-toggle", type: "bool" },
+  { id: "combo-imbue-toggle", type: "bool" },
+];
+
 function gpSignClass(value) {
   if (value == null) return "";
   return value >= 0 ? "gp-positive" : "gp-negative";
@@ -45,7 +55,12 @@ function profitOptionsFromForm() {
   };
 }
 
-function profitStatusText(form) {
+function bestProfitLabel(bestRow) {
+  if (!bestRow) return "No profitable methods at this level with current prices.";
+  return `Best GP/hr: ${bestRow.rune.name} · ${formatGp(bestRow.gpHour)}/hr`;
+}
+
+function profitStatusText(form, bestRow) {
   const eyeLabel = form.eyeEnabled ? " · Eye set ON" : "";
   const comboLabel = form.bindingNecklace
     ? " · Binding necklace ON"
@@ -53,16 +68,18 @@ function profitStatusText(form) {
   const imbueLabel = form.magicImbue ? " · Magic Imbue ON" : "";
 
   return (
+    `${bestProfitLabel(bestRow)} · ` +
     `Level ${form.rcLevel}${eyeLabel}${comboLabel}${imbueLabel}` +
     ` · ${form.pouch.name} · ${form.pouch.essencesPerTrip.toLocaleString()} ess/trip` +
     ` × ${form.tripsHour.toLocaleString()} trips/hr = ${form.essencesPerHour.toLocaleString()} ess/hr`
   );
 }
 
-function appendProfitRow(tbody, row) {
-  const { rune, canCraft, profit, gpHour } = row;
+function appendProfitRow(tbody, row, isBest) {
+  const { rune, canCraft, profit, gpHour, xpHour } = row;
   const tr = document.createElement("tr");
   if (!canCraft) tr.classList.add("unavailable");
+  if (isBest) tr.classList.add("profit-best");
 
   tr.innerHTML = `
     <td>${runeNameCell(rune.name)}</td>
@@ -72,6 +89,7 @@ function appendProfitRow(tbody, row) {
     <td>${canCraft ? row.outputPerEssence ?? "—" : "—"}</td>
     <td class="${gpSignClass(profit)}">${profitCellContent(row)}</td>
     <td class="${gpSignClass(gpHour)}">${canCraft && gpHour != null ? formatGp(gpHour) : "—"}</td>
+    <td>${canCraft && xpHour != null ? formatXp(xpHour) + "/hr" : "—"}</td>
   `;
   tbody.appendChild(tr);
 }
@@ -87,13 +105,16 @@ function renderProfit(prices) {
     ...COMBINATION_RUNES.map((combo) => combinationProfitRow(combo, form.calcOptions, prices)),
   ].sort((a, b) => a.rune.reqLevel - b.rune.reqLevel || a.rune.name.localeCompare(b.rune.name));
 
-  for (const row of rows) appendProfitRow(tbody, row);
-  status.textContent = profitStatusText(form);
+  const bestRow = findBestProfitRow(rows);
+  for (const row of rows) appendProfitRow(tbody, row, bestRow && row === bestRow);
+  status.textContent = profitStatusText(form, bestRow);
 }
 
 function bindProfitControls() {
   if (profitControlsBound) return;
   profitControlsBound = true;
+
+  applyTabPreset("profit", PROFIT_PRESET_FIELDS);
 
   const onUpdate = () => {
     if (cachedPrices) renderProfit(cachedPrices);
@@ -111,6 +132,8 @@ function bindProfitControls() {
   ]) {
     bindControl(id, onUpdate);
   }
+
+  bindPresetFields("profit", PROFIT_PRESET_FIELDS);
 }
 
 async function loadProfit(initialPrices = null) {
