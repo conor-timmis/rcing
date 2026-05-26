@@ -390,3 +390,8 @@ function runeIconUrl(name) {
   const file = name.replace(/ /g, "_") + ".png";
   return `${WIKI_ICON}/${file}`;
 }
+
+function runeNameCell(name, { hideIconOnError = false, suffix = "" } = {}) {
+  const onError = hideIconOnError ? ' onerror="this.style.display=\'none\'"' : "";
+  return `<span class="rune-name"><img src="${runeIconUrl(name)}" alt="" width="18" height="18"${onError}>${name}${suffix}</span>`;
+}

@@ -70,12 +70,14 @@ async function getPrices() {
   return pricesFetch;
 }
 
+const TAB_STATUS_IDS = {
+  glossary: "glossary-status",
+  profit: "profit-status",
+  gotr: "gotr-status",
+};
+
 function tabStatusId(tab) {
-  return tab === "glossary"
-    ? "glossary-status"
-    : tab === "profit"
-      ? "profit-status"
-      : "gotr-status";
+  return TAB_STATUS_IDS[tab];
 }
 
 function showTabError(tab, message) {

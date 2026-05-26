@@ -1,5 +1,19 @@
 /** Price helpers and runecrafting calculations. */
 
+const TREND_FLAT_THRESHOLD_PCT = 1;
+const EYE_SET_BONUS_MULTIPLIER = 6;
+const EYE_SET_BONUS_DIVISOR = 10;
+const INVENTORY_SLOTS = 28;
+const COMBO_OUTPUT_WITH_NECKLACE = 1;
+const COMBO_OUTPUT_WITHOUT_NECKLACE = 0.5;
+const BINDING_NECKLACE_CHARGES = 16;
+const GOTR_LANTERN_XP_MULTIPLIER = 1.05;
+const GOTR_BOOSTED_XP_MULTIPLIER = 1.02;
+const GOTR_TALISMAN_INNER_WEIGHT = {
+  boosted: 4375,
+  standard: 4900,
+};
+
 function midPrice(entry) {
   if (!entry) return null;
   const { high, low } = entry;
@@ -19,8 +33,8 @@ function trend(latestEntry, dayEntry) {
   if (current == null || avg == null) return { dir: "flat", label: "—", pct: 0 };
 
   const pct = ((current - avg) / avg) * 100;
-  if (pct > 1) return { dir: "up", label: "▲", pct };
-  if (pct < -1) return { dir: "down", label: "▼", pct };
+  if (pct > TREND_FLAT_THRESHOLD_PCT) return { dir: "up", label: "▲", pct };
+  if (pct < -TREND_FLAT_THRESHOLD_PCT) return { dir: "down", label: "▼", pct };
   return { dir: "flat", label: "—", pct };
 }
 
@@ -41,7 +55,7 @@ function baseRunesPerEssence(rune, rcLevel) {
  */
 function runesWithEye(baseRunes, eyeEnabled) {
   if (!eyeEnabled || baseRunes <= 0) return baseRunes;
-  const bonus = Math.floor((baseRunes * 6) / 10);
+  const bonus = Math.floor((baseRunes * EYE_SET_BONUS_MULTIPLIER) / EYE_SET_BONUS_DIVISOR);
   return baseRunes + bonus;
 }
 
@@ -94,19 +108,19 @@ function standardPouchSummary(rcLevel) {
 
   return {
     name: pouches.length ? pouches.map((pouch) => pouch.name).join(", ") : "No pouches",
-    essencesPerTrip: 28 - slots + capacity,
+    essencesPerTrip: INVENTORY_SLOTS - slots + capacity,
   };
 }
 
 function colossalPouchSummary(rcLevel) {
   const tier = COLOSSAL_POUCH_TIERS.find((t) => rcLevel >= t.reqLevel);
   if (!tier) {
-    return { name: "Colossal pouch unavailable", essencesPerTrip: 28 };
+    return { name: "Colossal pouch unavailable", essencesPerTrip: INVENTORY_SLOTS };
   }
 
   return {
     name: `Colossal pouch (${tier.capacity})`,
-    essencesPerTrip: 28 - 1 + tier.capacity,
+    essencesPerTrip: INVENTORY_SLOTS - 1 + tier.capacity,
   };
 }
 
@@ -119,7 +133,7 @@ function pouchSummary(setupId, rcLevel, manualEssencesPerTrip) {
       essencesPerTrip: Math.max(1, manualEssencesPerTrip || 1),
     };
   }
-  return { name: "Inventory only", essencesPerTrip: 28 };
+  return { name: "Inventory only", essencesPerTrip: INVENTORY_SLOTS };
 }
 
 function totalItemCost(prices, items) {
@@ -132,6 +146,39 @@ function totalItemCost(prices, items) {
   return cost;
 }
 
+function combinationRouteUnavailable(route, runePrice) {
+  return {
+    route,
+    runePrice,
+    cost: null,
+    revenue: null,
+    profit: null,
+    actionProfit: null,
+    outputPerEssence: null,
+  };
+}
+
+function combinationActionCost(route, options, prices) {
+  const usesMagicImbue = options.magicImbue || route.requiresMagicImbue;
+  let actionCost = 0;
+
+  if (usesMagicImbue) {
+    const spellCost = totalItemCost(prices, MAGIC_IMBUE_COSTS);
+    if (spellCost == null) return null;
+    actionCost += spellCost;
+  } else if (route.talismanItemId) {
+    const talismanPrice = getItemPrice(prices, route.talismanItemId);
+    if (talismanPrice == null) return null;
+    actionCost += talismanPrice;
+  }
+
+  if (!options.bindingNecklace) return actionCost;
+
+  const necklacePrice = getItemPrice(prices, ITEM_IDS.bindingNecklace);
+  if (necklacePrice == null) return null;
+  return actionCost + necklacePrice / BINDING_NECKLACE_CHARGES;
+}
+
 function combinationRouteProfit(combo, route, options, prices) {
   const essenceCount = Math.max(1, options.essencesPerAction || 1);
   const essencePrice = getItemPrice(prices, PURE_ESSENCE_ID);
@@ -139,63 +186,20 @@ function combinationRouteProfit(combo, route, options, prices) {
   const runePrice = getItemPrice(prices, combo.itemId);
 
   if (essencePrice == null || inputPrice == null || runePrice == null) {
-    return {
-      route,
-      runePrice,
-      cost: null,
-      revenue: null,
-      profit: null,
-      actionProfit: null,
-      outputPerEssence: null,
-    };
+    return combinationRouteUnavailable(route, runePrice);
   }
 
-  const usesMagicImbue = options.magicImbue || route.requiresMagicImbue;
-  const outputPerEssence = options.bindingNecklace ? 1 : 0.5;
+  const outputPerEssence = options.bindingNecklace
+    ? COMBO_OUTPUT_WITH_NECKLACE
+    : COMBO_OUTPUT_WITHOUT_NECKLACE;
 
-  let actionCost = 0;
-  if (usesMagicImbue) {
-    const spellCost = totalItemCost(prices, MAGIC_IMBUE_COSTS);
-    if (spellCost == null) actionCost = null;
-    else actionCost += spellCost;
-  } else if (route.talismanItemId) {
-    const talismanPrice = getItemPrice(prices, route.talismanItemId);
-    if (talismanPrice == null) actionCost = null;
-    else actionCost += talismanPrice;
-  }
-
-  if (options.bindingNecklace && actionCost != null) {
-    const necklacePrice = getItemPrice(prices, ITEM_IDS.bindingNecklace);
-    if (necklacePrice == null) actionCost = null;
-    else actionCost += necklacePrice / 16;
-  }
-
-  if (actionCost == null) {
-    return {
-      route,
-      runePrice,
-      cost: null,
-      revenue: null,
-      profit: null,
-      actionProfit: null,
-      outputPerEssence: null,
-    };
-  }
+  const actionCost = combinationActionCost(route, options, prices);
+  if (actionCost == null) return combinationRouteUnavailable(route, runePrice);
 
   let successCost = 0;
   if (route.successCosts) {
     const routeSuccessCost = totalItemCost(prices, route.successCosts);
-    if (routeSuccessCost == null) {
-      return {
-        route,
-        runePrice,
-        cost: null,
-        revenue: null,
-        profit: null,
-        actionProfit: null,
-        outputPerEssence: null,
-      };
-    }
+    if (routeSuccessCost == null) return combinationRouteUnavailable(route, runePrice);
     successCost = routeSuccessCost * outputPerEssence;
   }
 
@@ -286,8 +290,8 @@ function interpolateGotrXp(rcLevel) {
 
 function gotrXpPerHour(options) {
   let xp = interpolateGotrXp(options.rcLevel);
-  if (options.lantern) xp *= 1.05;
-  if (options.boostedRates) xp *= 1.02;
+  if (options.lantern) xp *= GOTR_LANTERN_XP_MULTIPLIER;
+  if (options.boostedRates) xp *= GOTR_BOOSTED_XP_MULTIPLIER;
   return Math.round(xp);
 }
 
@@ -324,7 +328,10 @@ function gotrExpectedPerSearch(entry, tableWeight, rcLevel, prices) {
 
 function gotrTalismanExpected(tableWeight, rcLevel, prices) {
   const tableChance = GOTR_TALISMAN_TABLE.weight / tableWeight;
-  const innerWeight = tableWeight === GOTR_TABLE_WEIGHT.boosted ? 4375 : 4900;
+  const innerWeight =
+    tableWeight === GOTR_TABLE_WEIGHT.boosted
+      ? GOTR_TALISMAN_INNER_WEIGHT.boosted
+      : GOTR_TALISMAN_INNER_WEIGHT.standard;
   const rows = [];
 
   for (const item of GOTR_TALISMAN_TABLE.items) {
@@ -381,18 +388,7 @@ function gotrComboCostsPerHour(prices) {
   return total;
 }
 
-function gotrRewardBreakdown(options, prices) {
-  const tableWeight = options.boostedRates
-    ? GOTR_TABLE_WEIGHT.boosted
-    : GOTR_TABLE_WEIGHT.standard;
-
-  const rows = GOTR_MAIN_REWARDS.map((entry) =>
-    gotrExpectedPerSearch(entry, tableWeight, options.rcLevel, prices),
-  );
-
-  rows.push(...gotrTalismanExpected(tableWeight, options.rcLevel, prices));
-  rows.push(...gotrRareExpected(prices));
-
+function mergeGotrRewardRows(rows) {
   const merged = new Map();
   for (const row of rows) {
     const key = row.itemId ?? row.name;
@@ -405,12 +401,26 @@ function gotrRewardBreakdown(options, prices) {
       } else {
         existing.gpPerSearch = null;
       }
-    } else {
-      merged.set(key, { ...row });
+      continue;
     }
+    merged.set(key, { ...row });
   }
-
   return [...merged.values()].sort((a, b) => (b.gpPerSearch ?? 0) - (a.gpPerSearch ?? 0));
+}
+
+function gotrRewardBreakdown(options, prices) {
+  const tableWeight = options.boostedRates
+    ? GOTR_TABLE_WEIGHT.boosted
+    : GOTR_TABLE_WEIGHT.standard;
+
+  const rows = GOTR_MAIN_REWARDS.map((entry) =>
+    gotrExpectedPerSearch(entry, tableWeight, options.rcLevel, prices),
+  );
+
+  rows.push(...gotrTalismanExpected(tableWeight, options.rcLevel, prices));
+  rows.push(...gotrRareExpected(prices));
+
+  return mergeGotrRewardRows(rows);
 }
 
 function gotrSummary(options, prices) {

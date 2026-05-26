@@ -50,3 +50,25 @@ function bindControl(id, onUpdate) {
     if (onUpdate) onUpdate();
   });
 }
+
+const PRICES_API = "/api/prices";
+const PRICES_LOAD_ERROR = "Could not load prices. Is the server running?";
+
+async function loadPricesForTab({ initialPrices, statusId, render }) {
+  if (initialPrices) {
+    render(initialPrices);
+    return initialPrices;
+  }
+
+  const status = document.getElementById(statusId);
+  try {
+    const res = await fetch(PRICES_API);
+    if (!res.ok) throw new Error("API error");
+    const prices = await res.json();
+    render(prices);
+    return prices;
+  } catch {
+    if (status) status.textContent = PRICES_LOAD_ERROR;
+    return null;
+  }
+}
