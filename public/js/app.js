@@ -3,6 +3,7 @@ const CORE_SCRIPTS = ["/js/runes.js", "/js/inputs.js", "/js/calc.js"];
 const TAB_SCRIPTS = {
   glossary: ["/js/glossary.js"],
   profit: ["/js/profit.js"],
+  zmi: ["/js/zmi-data.js", "/js/zmi.js"],
   gotr: ["/js/gotr-data.js", "/js/gotr.js"],
 };
 
@@ -73,6 +74,7 @@ async function getPrices() {
 const TAB_STATUS_IDS = {
   glossary: "glossary-status",
   profit: "profit-status",
+  zmi: "zmi-status",
   gotr: "gotr-status",
 };
 
@@ -98,6 +100,7 @@ async function ensureTabReady(tab) {
       const prices = await getPrices();
       if (tab === "glossary") await loadGlossary(prices);
       else if (tab === "profit") await loadProfit(prices);
+      else if (tab === "zmi") await loadZmi(prices);
       else if (tab === "gotr") await loadGotr(prices);
       readyTabs.add(tab);
     } catch {
