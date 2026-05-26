@@ -27,6 +27,24 @@ function formatGp(n) {
   return sign + Math.round(Math.abs(n)).toLocaleString() + " gp";
 }
 
+const CHANCE_PERCENT_THRESHOLD = 0.01;
+const CHANCE_FRACTION_THRESHOLD = 0.001;
+const QTY_WHOLE_NUMBER_THRESHOLD = 100;
+const QTY_ONE_DECIMAL_THRESHOLD = 1;
+
+function formatChance(rate) {
+  if (rate >= CHANCE_PERCENT_THRESHOLD) return `${(rate * 100).toFixed(1)}%`;
+  if (rate >= CHANCE_FRACTION_THRESHOLD) return `${(rate * 100).toFixed(2)}%`;
+  return `1/${Math.round(1 / rate)}`;
+}
+
+function formatQty(n) {
+  if (n == null || Number.isNaN(n)) return "—";
+  if (n >= QTY_WHOLE_NUMBER_THRESHOLD) return Math.round(n).toLocaleString();
+  if (n >= QTY_ONE_DECIMAL_THRESHOLD) return n.toFixed(1);
+  return n.toFixed(2);
+}
+
 function trend(latestEntry, dayEntry) {
   const current = midPrice(latestEntry);
   const avg = dayEntry?.avgHighPrice ?? dayEntry?.avgLowPrice ?? null;
@@ -99,6 +117,25 @@ function profitPerEssence(rune, rcLevel, eyeEnabled, prices) {
 function profitPerHour(profitPerEss, essencesHour) {
   if (profitPerEss == null) return null;
   return Math.round(profitPerEss * essencesHour);
+}
+
+function xpPerHour(xpPerEssence, essencesHour) {
+  if (xpPerEssence == null || essencesHour == null) return null;
+  return Math.round(xpPerEssence * essencesHour);
+}
+
+function formatXp(n) {
+  if (n == null || Number.isNaN(n)) return "—";
+  return Math.round(n).toLocaleString() + " xp";
+}
+
+function findBestProfitRow(rows) {
+  let best = null;
+  for (const row of rows) {
+    if (!row.canCraft || row.gpHour == null) continue;
+    if (!best || row.gpHour > best.gpHour) best = row;
+  }
+  return best;
 }
 
 function standardPouchSummary(rcLevel) {
@@ -244,6 +281,7 @@ function normalProfitRow(rune, options, prices) {
     cost,
     profit,
     gpHour: profitPerHour(profit, options.essencesPerHour),
+    xpHour: canCraft ? xpPerHour(rune.xp, options.essencesPerHour) : null,
   };
 }
 
@@ -268,6 +306,7 @@ function combinationProfitRow(combo, options, prices) {
     cost: estimate.cost,
     profit: estimate.profit,
     gpHour: profitPerHour(estimate.profit, options.essencesPerHour),
+    xpHour: canCraft ? xpPerHour(route.xp, options.essencesPerHour) : null,
   };
 }
 
@@ -439,6 +478,135 @@ function gotrSummary(options, prices) {
     comboCosts,
     netGpHour,
     gpPerSearch,
+    rows,
+  };
+}
+
+function zmiLevelBand(rcLevel) {
+  const level = Math.max(1, Math.min(99, rcLevel));
+  return (
+    ZMI_LEVEL_BANDS.find((band) => level >= band.minLevel && level <= band.maxLevel) ??
+    ZMI_LEVEL_BANDS[ZMI_LEVEL_BANDS.length - 1]
+  );
+}
+
+function zmiStandardPouchTiers(rcLevel) {
+  return STANDARD_POUCHES.filter((pouch) => rcLevel >= pouch.reqLevel).length;
+}
+
+function zmiTripsPerHour(tripSeconds, rcLevel) {
+  if (tripSeconds <= 0) return 0;
+  const baseTrips = ZMI_SECONDS_PER_HOUR / tripSeconds;
+  const lostSeconds = ZMI_NPC_CONTACT_SECONDS_PER_POUCH * zmiStandardPouchTiers(rcLevel);
+  return baseTrips * ((ZMI_SECONDS_PER_HOUR - lostSeconds) / ZMI_SECONDS_PER_HOUR);
+}
+
+function zmiRunesPerCraft(eyeEnabled, ardougneDiary) {
+  let runes = runesWithEye(1, eyeEnabled);
+  if (ardougneDiary) runes *= ZMI_DIARY_AVG_OUTPUT_MULTIPLIER;
+  return runes;
+}
+
+function zmiExpectedRuneRow(key, chancePct, options, prices) {
+  const rune = ZMI_RUNE_BY_KEY[key];
+  if (!rune) return null;
+
+  const chance = chancePct / 100;
+  const runesPerCraft = zmiRunesPerCraft(options.eyeEnabled, options.ardougneDiary);
+  const qtyPerEssence = chance * runesPerCraft;
+  const price = getItemPrice(prices, rune.itemId);
+  const gpPerEssence = price != null ? qtyPerEssence * price : null;
+
+  return {
+    name: rune.name,
+    itemId: rune.itemId,
+    chance,
+    qtyPerEssence,
+    gpPerEssence,
+  };
+}
+
+function zmiRewardBreakdown(options, prices) {
+  const band = zmiLevelBand(options.rcLevel);
+  const rows = [];
+
+  for (const key of ZMI_RUNE_KEYS) {
+    const pct = band.distribution[key];
+    if (pct == null) continue;
+    const row = zmiExpectedRuneRow(key, pct, options, prices);
+    if (row) rows.push(row);
+  }
+
+  return rows.sort((a, b) => (b.gpPerEssence ?? 0) - (a.gpPerEssence ?? 0));
+}
+
+function zmiXpPerEssence(options) {
+  const band = zmiLevelBand(options.rcLevel);
+  return options.daeyalt ? band.xpPerEssenceDaeyalt : band.xpPerEssencePure;
+}
+
+function zmiEssenceCostPerEssence(options, prices) {
+  if (options.daeyalt) return 0;
+  return getItemPrice(prices, PURE_ESSENCE_ID);
+}
+
+function zmiSupplyCostPerTrip(options, prices) {
+  if (!options.includeSupplyCosts) return 0;
+
+  let cost = 0;
+
+  const teleportCost = totalItemCost(prices, ZMI_OURANIA_TELEPORT_COSTS);
+  if (teleportCost == null) return null;
+  cost += teleportCost;
+
+  const bankRunePrice = getItemPrice(prices, ZMI_BANK_PAYMENT_ITEM_ID);
+  if (bankRunePrice == null) return null;
+  cost += bankRunePrice * ZMI_ENIOLA_RUNES_PER_BANK;
+
+  return cost;
+}
+
+function zmiSummary(options, prices) {
+  const pouch = pouchSummary(options.pouchSetup, options.rcLevel, options.manualEssencesPerTrip);
+  const tripsPerHour = zmiTripsPerHour(options.tripSeconds, options.rcLevel);
+  const essencesPerHour = Math.round(pouch.essencesPerTrip * tripsPerHour);
+
+  const rows = zmiRewardBreakdown(options, prices);
+  const grossGpPerEssence = rows.reduce((sum, row) => sum + (row.gpPerEssence ?? 0), 0);
+
+  const essenceCost = zmiEssenceCostPerEssence(options, prices);
+  const supplyPerTrip = zmiSupplyCostPerTrip(options, prices);
+
+  let netGpPerEssence = grossGpPerEssence;
+  if (essenceCost != null) netGpPerEssence -= essenceCost;
+  else netGpPerEssence = null;
+
+  let grossGpHour = grossGpPerEssence != null ? Math.round(grossGpPerEssence * essencesPerHour) : null;
+  let netGpHour = netGpPerEssence != null ? Math.round(netGpPerEssence * essencesPerHour) : null;
+
+  if (supplyPerTrip != null && netGpHour != null) {
+    netGpHour -= Math.round(supplyPerTrip * tripsPerHour);
+  } else if (options.includeSupplyCosts && supplyPerTrip == null) {
+    netGpHour = null;
+  }
+
+  const xpPerEss = zmiXpPerEssence(options);
+  const rcXpPerHour = Math.round(xpPerEss * essencesPerHour);
+
+  return {
+    pouch,
+    tripsPerHour,
+    essencesPerHour,
+    grossGpPerEssence,
+    netGpPerEssence,
+    grossGpHour,
+    netGpHour,
+    supplyCostPerHour:
+      supplyPerTrip != null && options.includeSupplyCosts
+        ? Math.round(supplyPerTrip * tripsPerHour)
+        : null,
+    rcXpPerHour,
+    xpPerEssence: xpPerEss,
     rows,
   };
 }

@@ -1,24 +1,17 @@
 let gotrCachedPrices = null;
 let gotrControlsBound = false;
 
-const CHANCE_PERCENT_THRESHOLD = 0.01;
-const CHANCE_FRACTION_THRESHOLD = 0.001;
-const QTY_WHOLE_NUMBER_THRESHOLD = 100;
-const QTY_ONE_DECIMAL_THRESHOLD = 1;
 const GOTR_MIN_LEVEL = 27;
 
-function formatChance(rate) {
-  if (rate >= CHANCE_PERCENT_THRESHOLD) return `${(rate * 100).toFixed(1)}%`;
-  if (rate >= CHANCE_FRACTION_THRESHOLD) return `${(rate * 100).toFixed(2)}%`;
-  return `1/${Math.round(1 / rate)}`;
-}
-
-function formatQty(n) {
-  if (n == null || Number.isNaN(n)) return "—";
-  if (n >= QTY_WHOLE_NUMBER_THRESHOLD) return Math.round(n).toLocaleString();
-  if (n >= QTY_ONE_DECIMAL_THRESHOLD) return n.toFixed(1);
-  return n.toFixed(2);
-}
+const GOTR_PRESET_FIELDS = [
+  { id: "gotr-rc-level", type: "int" },
+  { id: "gotr-games-hour", type: "int" },
+  { id: "gotr-elemental-points", type: "int" },
+  { id: "gotr-catalytic-points", type: "int" },
+  { id: "gotr-boosted-rates", type: "bool" },
+  { id: "gotr-lantern-toggle", type: "bool" },
+  { id: "gotr-combo-toggle", type: "bool" },
+];
 
 function gotrOptionsFromForm() {
   return {
@@ -90,6 +83,8 @@ function bindGotrControls() {
   if (gotrControlsBound) return;
   gotrControlsBound = true;
 
+  applyTabPreset("gotr", GOTR_PRESET_FIELDS);
+
   const onUpdate = () => {
     if (gotrCachedPrices) renderGotr(gotrCachedPrices);
   };
@@ -107,6 +102,8 @@ function bindGotrControls() {
   for (const id of ["gotr-boosted-rates", "gotr-lantern-toggle", "gotr-combo-toggle"]) {
     bindControl(id, onUpdate);
   }
+
+  bindPresetFields("gotr", GOTR_PRESET_FIELDS);
 }
 
 async function loadGotr(initialPrices = null) {

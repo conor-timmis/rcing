@@ -72,3 +72,72 @@ async function loadPricesForTab({ initialPrices, statusId, render }) {
     return null;
   }
 }
+
+const PRESET_STORAGE_KEY = "rcing.presets.v1";
+
+function loadPresets() {
+  try {
+    const raw = localStorage.getItem(PRESET_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function savePresetTab(tab, values) {
+  const presets = loadPresets();
+  presets[tab] = values;
+  localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify(presets));
+}
+
+function readControlValue(id, type) {
+  const el = document.getElementById(id);
+  if (!el) return undefined;
+
+  if (type === "bool") return el.checked;
+  if (type === "select") return el.value;
+  return el.value;
+}
+
+function writeControlValue(id, type, value) {
+  const el = document.getElementById(id);
+  if (!el || value === undefined) return;
+
+  if (type === "bool") {
+    el.checked = Boolean(value);
+    return;
+  }
+  el.value = String(value);
+}
+
+function applyTabPreset(tab, fields) {
+  const stored = loadPresets()[tab];
+  if (!stored) return;
+
+  for (const field of fields) {
+    writeControlValue(field.id, field.type, stored[field.id]);
+  }
+}
+
+function bindPresetFields(tab, fields, onSave) {
+  function persist() {
+    const values = {};
+    for (const field of fields) {
+      const value = readControlValue(field.id, field.type);
+      if (value !== undefined) values[field.id] = value;
+    }
+    savePresetTab(tab, values);
+    if (onSave) onSave();
+  }
+
+  for (const field of fields) {
+    const el = document.getElementById(field.id);
+    if (!el) continue;
+    el.addEventListener("change", persist);
+    if (field.type !== "bool") el.addEventListener("input", persist);
+  }
+
+  return persist;
+}
