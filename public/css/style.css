@@ -27,7 +27,6 @@ a {
   padding: 0 16px 32px;
 }
 
-/* Header — top of page */
 .site-header {
   padding: 24px 0 0;
   text-align: center;
@@ -41,7 +40,8 @@ a {
   color: #f0e6d2;
 }
 
-.logo img {
+.logo img,
+.rune-name img {
   image-rendering: pixelated;
 }
 
@@ -51,7 +51,6 @@ a {
   letter-spacing: 0.02em;
 }
 
-/* Tab nav */
 .tab-nav {
   display: flex;
   justify-content: center;
@@ -82,7 +81,6 @@ a {
   border-color: #8b7355;
 }
 
-/* Content */
 .content {
   background: #4a3f2f;
   border: 1px solid #6b5a3e;
@@ -144,12 +142,17 @@ a {
   margin-bottom: 14px;
 }
 
+.control-group,
+.auth-panel,
+.tab-highlight {
+  border: 1px solid #6b5a3e;
+  background: rgba(43, 36, 25, 0.35);
+}
+
 .tab-highlight {
   display: grid;
   gap: 4px 10px;
   padding: 14px 16px;
-  border: 1px solid #6b5a3e;
-  background: rgba(43, 36, 25, 0.35);
   grid-template-columns: 1fr auto;
   grid-template-rows: auto auto auto;
   align-items: center;
@@ -273,8 +276,6 @@ a {
   align-content: flex-start;
   margin: 0;
   padding: 14px;
-  border: 1px solid #6b5a3e;
-  background: rgba(43, 36, 25, 0.35);
 }
 
 .control-group legend {
@@ -283,7 +284,8 @@ a {
   font-size: 0.9rem;
 }
 
-.controls label {
+.controls label,
+.stack-form label {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -291,14 +293,25 @@ a {
   color: #b8a88a;
 }
 
+.stack-form label small {
+  color: #8b7355;
+  font-weight: normal;
+}
+
 .controls input[type="number"],
-.controls select {
+.controls select,
+.stack-form input,
+.stack-form textarea {
   background: #2b2419;
   border: 1px solid #6b5a3e;
   border-radius: 2px;
   color: #f0e6d2;
   font-family: inherit;
   font-size: 1rem;
+}
+
+.controls input[type="number"],
+.controls select {
   min-height: 32px;
   padding: 5px 9px;
   width: 150px;
@@ -316,6 +329,16 @@ a {
   background-size: 5px 5px, 5px 5px;
   padding-right: 28px;
   width: 210px;
+}
+
+.stack-form input,
+.stack-form textarea {
+  padding: 8px 10px;
+}
+
+.stack-form textarea {
+  resize: vertical;
+  min-height: 140px;
 }
 
 .controls input[type="number"]:focus,
@@ -352,7 +375,6 @@ a {
   width: auto;
 }
 
-/* Tables */
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -412,15 +434,15 @@ a {
   gap: 8px;
 }
 
-.rune-name img {
-  image-rendering: pixelated;
-}
-
-.trend-up {
+.gp-positive,
+.trend-up,
+.btn-complete {
   color: #6b8;
 }
 
-.trend-down {
+.gp-negative,
+.trend-down,
+.status-error {
   color: #c66;
 }
 
@@ -428,23 +450,11 @@ a {
   color: #b8a88a;
 }
 
-.gp-positive {
-  color: #6b8;
-}
-
-.gp-negative {
-  color: #c66;
-}
-
 .site-footer {
   margin-top: 24px;
   text-align: center;
   font-size: 0.8rem;
   color: #8b7355;
-}
-
-.site-footer a {
-  color: #c8a84b;
 }
 
 .page-title {
@@ -455,11 +465,9 @@ a {
 }
 
 .auth-content {
-  margin-top: 20vh;
+  margin: 20vh auto 0;
   min-height: 420px;
   max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .page-toolbar {
@@ -484,8 +492,6 @@ a {
 }
 
 .auth-panel {
-  border: 1px solid #6b5a3e;
-  background: rgba(43, 36, 25, 0.35);
   padding: 16px;
 }
 
@@ -493,39 +499,10 @@ a {
   max-width: 420px;
 }
 
-.stack-form label small {
-  color: #8b7355;
-  font-weight: normal;
-}
-
 .stack-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.stack-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.85rem;
-  color: #b8a88a;
-}
-
-.stack-form input,
-.stack-form textarea {
-  background: #2b2419;
-  border: 1px solid #6b5a3e;
-  border-radius: 2px;
-  color: #f0e6d2;
-  font-family: inherit;
-  font-size: 1rem;
-  padding: 8px 10px;
-}
-
-.stack-form textarea {
-  resize: vertical;
-  min-height: 140px;
 }
 
 .btn {
@@ -542,7 +519,6 @@ a {
 
 .btn:hover {
   background: #3d3428;
-  color: #f0e6d2;
 }
 
 .btn-secondary {
@@ -554,10 +530,6 @@ a {
   padding: 4px 10px;
 }
 
-.status-error {
-  color: #c66;
-}
-
 .issue-body-preview {
   margin-top: 6px;
   color: #b8a88a;
@@ -567,8 +539,6 @@ a {
 
 .issue-status {
   margin-top: 10px;
-  color: #b8a88a;
-  font-size: 0.85rem;
 }
 
 .action-cell {
@@ -578,7 +548,6 @@ a {
 }
 
 .btn-complete {
-  color: #6b8;
   border-color: #4a6b4a;
 }
 
@@ -601,10 +570,6 @@ a {
 }
 
 @media (max-width: 640px) {
-  .tab-nav {
-    margin-top: 10vh;
-  }
-
   .controls input[type="number"],
   .controls select {
     width: 100%;
