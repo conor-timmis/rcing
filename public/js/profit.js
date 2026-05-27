@@ -71,7 +71,12 @@ function bestProfitLabel(bestRow) {
   return `Best GP/hr: ${bestRow.rune.name} · ${formatGp(bestRow.gpHour)}/hr`;
 }
 
-function profitStatusText(form, bestRow) {
+function bestXpLabel(bestRow) {
+  if (!bestRow) return "No craftable methods at this level.";
+  return `Best XP/hr: ${bestRow.rune.name} · ${formatXp(bestRow.xpHour)}/hr`;
+}
+
+function profitStatusText(form, bestGpRow, bestXpRow) {
   const eyeLabel = form.eyeEnabled ? " · Eye set ON" : "";
   const daeyaltLabel = form.daeyalt ? " · Daeyalt essence" : "";
   const capeLabel = form.rcCape ? " · RC cape" : "";
@@ -81,7 +86,7 @@ function profitStatusText(form, bestRow) {
   const imbueLabel = form.magicImbue ? " · Magic Imbue ON" : "";
 
   return (
-    `${bestProfitLabel(bestRow)} · ` +
+    `${bestProfitLabel(bestGpRow)} · ${bestXpLabel(bestXpRow)} · ` +
     `Level ${form.rcLevel}${eyeLabel}${daeyaltLabel}${capeLabel}${comboLabel}${imbueLabel}` +
     ` · ${form.pouch.name} · ${form.pouch.essencesPerTrip.toLocaleString()} ess/trip` +
     ` · ${form.tripSeconds}s/trip ≈ ${form.tripsHour.toFixed(1)} trips/hr` +
@@ -89,11 +94,12 @@ function profitStatusText(form, bestRow) {
   );
 }
 
-function appendProfitRow(tbody, row, isBest) {
+function appendProfitRow(tbody, row, { isBestGp, isBestXp }) {
   const { rune, canCraft, profit, gpHour, xpHour } = row;
   const tr = document.createElement("tr");
   if (!canCraft) tr.classList.add("unavailable");
-  if (isBest) tr.classList.add("profit-best");
+  if (isBestGp) tr.classList.add("profit-best");
+  if (isBestXp) tr.classList.add("profit-best-xp");
 
   tr.innerHTML = `
     <td>${runeNameCell(rune.name)}</td>
@@ -119,9 +125,15 @@ function renderProfit(prices) {
     ...COMBINATION_RUNES.map((combo) => combinationProfitRow(combo, form.calcOptions, prices)),
   ].sort((a, b) => a.rune.reqLevel - b.rune.reqLevel || a.rune.name.localeCompare(b.rune.name));
 
-  const bestRow = findBestProfitRow(rows);
-  for (const row of rows) appendProfitRow(tbody, row, bestRow && row === bestRow);
-  status.textContent = profitStatusText(form, bestRow);
+  const bestGpRow = findBestProfitRow(rows);
+  const bestXpRow = findBestXpRow(rows);
+  for (const row of rows) {
+    appendProfitRow(tbody, row, {
+      isBestGp: bestGpRow && row === bestGpRow,
+      isBestXp: bestXpRow && row === bestXpRow,
+    });
+  }
+  status.textContent = profitStatusText(form, bestGpRow, bestXpRow);
 }
 
 function bindProfitControls() {

@@ -9,6 +9,7 @@ const RUNES = [
     multipliers: [1, 11, 22, 33, 44, 55, 66, 77, 88, 99],
     xp: 5,
     essenceItemId: 7936,
+    bestMethod: "Surface altar",
   },
   {
     id: "mind",
@@ -19,6 +20,7 @@ const RUNES = [
     multipliers: [2, 14, 28, 42, 56, 70, 84, 98],
     xp: 5.5,
     essenceItemId: 7936,
+    bestMethod: "Surface altar",
   },
   {
     id: "water",
@@ -29,6 +31,7 @@ const RUNES = [
     multipliers: [5, 19, 38, 57, 76, 95],
     xp: 6,
     essenceItemId: 7936,
+    bestMethod: "Surface altar",
   },
   {
     id: "earth",
@@ -39,6 +42,7 @@ const RUNES = [
     multipliers: [9, 26, 52, 78],
     xp: 6.5,
     essenceItemId: 7936,
+    bestMethod: "Surface altar",
   },
   {
     id: "fire",
@@ -49,6 +53,7 @@ const RUNES = [
     multipliers: [14, 35, 70],
     xp: 7,
     essenceItemId: 7936,
+    bestMethod: "Surface altar",
   },
   {
     id: "body",
@@ -59,6 +64,7 @@ const RUNES = [
     multipliers: [20, 46, 92],
     xp: 7.5,
     essenceItemId: 7936,
+    bestMethod: "Surface altar",
   },
   {
     id: "cosmic",
@@ -69,6 +75,7 @@ const RUNES = [
     multipliers: [27, 59],
     xp: 8,
     essenceItemId: 7936,
+    bestMethod: "Abyss",
   },
   {
     id: "sunfire",
@@ -83,6 +90,7 @@ const RUNES = [
       { itemId: 554, qty: 1, name: "Fire rune" },
       { itemId: 28924, qty: 1, name: "Sunfire splinters" },
     ],
+    bestMethod: "Sunfire altar",
   },
   {
     id: "chaos",
@@ -93,6 +101,7 @@ const RUNES = [
     multipliers: [35, 74],
     xp: 8.5,
     essenceItemId: 7936,
+    bestMethod: "Abyss",
   },
   {
     id: "astral",
@@ -103,6 +112,7 @@ const RUNES = [
     multipliers: [40, 82],
     xp: 8.7,
     essenceItemId: 7936,
+    bestMethod: "Lunar Isles",
   },
   {
     id: "nature",
@@ -113,6 +123,7 @@ const RUNES = [
     multipliers: [44, 91],
     xp: 9,
     essenceItemId: 7936,
+    bestMethod: "Abyss",
   },
   {
     id: "law",
@@ -123,6 +134,7 @@ const RUNES = [
     multipliers: [54, 95],
     xp: 9.5,
     essenceItemId: 7936,
+    bestMethod: "Abyss",
   },
   {
     id: "death",
@@ -133,6 +145,7 @@ const RUNES = [
     multipliers: [65, 99],
     xp: 10,
     essenceItemId: 7936,
+    bestMethod: "Abyss",
   },
   {
     id: "blood",
@@ -143,6 +156,7 @@ const RUNES = [
     multipliers: [77],
     xp: 10.5,
     essenceItemId: 7936,
+    bestMethod: "True Blood Altar",
     note: "True Blood Altar uses pure essence",
   },
   {
@@ -155,6 +169,7 @@ const RUNES = [
     xp: 29.7,
     essenceItemId: null,
     freeInput: true,
+    bestMethod: "Dark altar",
     note: "Uses dark essence fragments",
   },
   {
@@ -166,6 +181,7 @@ const RUNES = [
     multipliers: [95],
     xp: 8,
     essenceItemId: 7936,
+    bestMethod: "Myths' Guild",
   },
 ];
 
@@ -374,6 +390,7 @@ const COMBINATION_RUNES = [
     routes: [
       {
         altar: "Cosmic altar",
+        access: "Abyss",
         inputName: "Soul rune",
         inputItemId: ITEM_IDS.soulRune,
         requiresMagicImbue: true,

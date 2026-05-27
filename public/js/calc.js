@@ -138,6 +138,15 @@ function findBestProfitRow(rows) {
   return best;
 }
 
+function findBestXpRow(rows) {
+  let best = null;
+  for (const row of rows) {
+    if (!row.canCraft || row.xpHour == null) continue;
+    if (!best || row.xpHour > best.xpHour) best = row;
+  }
+  return best;
+}
+
 function standardPouchSummary(rcLevel, rcCape) {
   const pouches = STANDARD_POUCHES.filter((pouch) => rcLevel >= pouch.reqLevel);
   const capacity = pouches.reduce((sum, pouch) => sum + pouch.capacity, 0);
@@ -310,7 +319,7 @@ function normalProfitRow(rune, options, prices) {
   return {
     rune,
     canCraft,
-    method: rune.note ?? "Standard altar",
+    method: rune.bestMethod ?? "Surface altar",
     price: runePrice,
     outputPerEssence: canCraft ? String(total) : null,
     cost,
@@ -322,16 +331,21 @@ function normalProfitRow(rune, options, prices) {
   };
 }
 
+function combinationMethodLabel(route, options) {
+  const extraInputs = route.successCosts?.map((item) => item.name) ?? [];
+  const routeInputs = [route.inputName, ...extraInputs].join(" + ");
+  const craftDetail =
+    options.magicImbue || route.requiresMagicImbue
+      ? `${route.altar} · ${routeInputs}`
+      : `${route.altar} · ${routeInputs} + ${route.talismanName}`;
+  return route.access ? `${route.access} · ${craftDetail}` : craftDetail;
+}
+
 function combinationProfitRow(combo, options, prices) {
   const estimate = bestCombinationRoute(combo, options, prices);
   const route = estimate.route;
   const canCraft = options.rcLevel >= combo.reqLevel;
-  const extraInputs = route.successCosts?.map((item) => item.name) ?? [];
-  const routeInputs = [route.inputName, ...extraInputs].join(" + ");
-  const method =
-    options.magicImbue || route.requiresMagicImbue
-      ? `${route.altar} with ${routeInputs}`
-      : `${route.altar} with ${routeInputs} + ${route.talismanName}`;
+  const method = combinationMethodLabel(route, options);
 
   return {
     rune: combo,
