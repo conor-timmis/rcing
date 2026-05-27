@@ -13,6 +13,21 @@ function readClampedInput(id, min, max, fallback) {
   return clampInt(el.value, min, max, fallback);
 }
 
+/** True if the typed digits could still become a value in [min, max]. */
+function isPartialIntInRange(raw, min, max) {
+  const digits = String(raw).trim();
+  if (digits === "") return true;
+  if (!/^\d+$/.test(digits)) return false;
+
+  const n = Number.parseInt(digits, 10);
+  if (!Number.isFinite(n) || n > max) return false;
+
+  for (let v = min; v <= max; v++) {
+    if (String(v).startsWith(digits)) return true;
+  }
+  return false;
+}
+
 function bindClampedInput(id, { min, max, fallback, onUpdate }) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -27,10 +42,16 @@ function bindClampedInput(id, { min, max, fallback, onUpdate }) {
   }
 
   el.addEventListener("input", () => {
-    const n = Number.parseInt(el.value, 10);
-    if (Number.isFinite(n)) {
-      if (n > max) el.value = max;
-      else if (n < min) el.value = min;
+    const raw = el.value.trim();
+    const n = Number.parseInt(raw, 10);
+    if (!Number.isFinite(n)) {
+      if (onUpdate) onUpdate();
+      return;
+    }
+    if (n > max) {
+      el.value = max;
+    } else if (n < min && !isPartialIntInRange(raw, min, max)) {
+      el.value = min;
     }
     if (onUpdate) onUpdate();
   });
