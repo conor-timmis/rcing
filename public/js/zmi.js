@@ -81,28 +81,33 @@ function renderZmiHighlights(options, summary) {
 
   const gpCard =
     gpValue != null
-      ? `<article class="tab-highlight tab-highlight-gp">
-          <span class="tab-highlight-label">${gpLabel}</span>
-          <strong class="tab-highlight-title">Ourania altar</strong>
-          <span class="tab-highlight-value">${formatGp(gpValue)}/hr</span>
-          <span class="tab-highlight-meta">${gpMetaParts.join(" · ") || "Mixed rune rewards"}</span>
-        </article>`
-      : `<article class="tab-highlight tab-highlight-gp tab-highlight-empty">
-          <span class="tab-highlight-label">${gpLabel}</span>
-          <span class="tab-highlight-meta">GP/hr unavailable (missing prices or costs)</span>
-        </article>`;
+      ? tabHighlightCard({
+          kind: "gp",
+          label: gpLabel,
+          titleHtml: "Ourania altar",
+          valueHtml: `${formatGp(gpValue)}/hr`,
+          valueClass: gpValue >= 0 ? "gp-positive" : "gp-negative",
+          meta: gpMetaParts.join(" · ") || "Mixed rune rewards",
+        })
+      : tabHighlightCard({
+          kind: "gp",
+          label: gpLabel,
+          empty: true,
+          meta: "GP/hr unavailable (missing prices or costs)",
+        });
 
   const xpMeta =
     summary.xpPerEssence != null
       ? `${formatXp(summary.xpPerEssence)}/ess · ${summary.essencesPerHour.toLocaleString()} ess/hr`
       : `${summary.essencesPerHour.toLocaleString()} ess/hr`;
 
-  const xpCard = `<article class="tab-highlight tab-highlight-xp">
-      <span class="tab-highlight-label">RC XP/hr</span>
-      <strong class="tab-highlight-title">Ourania altar</strong>
-      <span class="tab-highlight-value">~${summary.rcXpPerHour.toLocaleString()}/hr</span>
-      <span class="tab-highlight-meta">${xpMeta}</span>
-    </article>`;
+  const xpCard = tabHighlightCard({
+    kind: "xp",
+    label: "Net XP/hr",
+    titleHtml: "Ourania altar",
+    valueHtml: `~${formatXp(summary.rcXpPerHour)}/hr`,
+    meta: xpMeta,
+  });
 
   container.innerHTML = gpCard + xpCard;
 }

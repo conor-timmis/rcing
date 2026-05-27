@@ -58,19 +58,22 @@ function renderGotrHighlights(options, summary) {
     gpMetaParts.push(`Gross ${formatGp(summary.grossGpHour)}/hr`);
   }
 
-  const gpCard = `<article class="tab-highlight tab-highlight-gp">
-      <span class="tab-highlight-label">${gpLabel}</span>
-      <strong class="tab-highlight-title">Guardians of the Rift</strong>
-      <span class="tab-highlight-value">${formatGp(gpValue)}/hr</span>
-      <span class="tab-highlight-meta">${gpMetaParts.join(" · ")}</span>
-    </article>`;
+  const gpCard = tabHighlightCard({
+    kind: "gp",
+    label: gpLabel,
+    titleHtml: "Guardians of the Rift",
+    valueHtml: `${formatGp(gpValue)}/hr`,
+    valueClass: gpValue >= 0 ? "gp-positive" : "gp-negative",
+    meta: gpMetaParts.join(" · "),
+  });
 
-  const xpCard = `<article class="tab-highlight tab-highlight-xp">
-      <span class="tab-highlight-label">RC XP/hr</span>
-      <strong class="tab-highlight-title">Guardians of the Rift</strong>
-      <span class="tab-highlight-value">~${summary.rcXpPerHour.toLocaleString()}/hr</span>
-      <span class="tab-highlight-meta">${summary.searchesPerHour} reward searches/hr</span>
-    </article>`;
+  const xpCard = tabHighlightCard({
+    kind: "xp",
+    label: "Net XP/hr",
+    titleHtml: "Guardians of the Rift",
+    valueHtml: `~${formatXp(summary.rcXpPerHour)}/hr`,
+    meta: `${summary.searchesPerHour} reward searches/hr`,
+  });
 
   container.innerHTML = gpCard + xpCard;
 }

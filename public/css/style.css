@@ -146,50 +146,69 @@ a {
 
 .tab-highlight {
   display: grid;
-  gap: 2px 8px;
-  padding: 12px 14px;
+  gap: 4px 10px;
+  padding: 14px 16px;
   border: 1px solid #6b5a3e;
-  background: rgba(43, 36, 25, 0.45);
+  background: rgba(43, 36, 25, 0.35);
   grid-template-columns: 1fr auto;
   grid-template-rows: auto auto auto;
+  align-items: center;
 }
 
 .tab-highlight-label {
   grid-column: 1 / -1;
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #8b7355;
+  color: #c8a84b;
 }
 
 .tab-highlight-title {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: normal;
   color: #f0e6d2;
+  min-width: 0;
+}
+
+.tab-highlight-title .rune-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .tab-highlight-value {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   color: #f0e6d2;
   text-align: right;
+  white-space: nowrap;
+}
+
+.tab-highlight-value-gp.gp-positive,
+.tab-highlight-gp .tab-highlight-value-gp:not(.gp-negative) {
+  color: #8fd4a0;
+}
+
+.tab-highlight-value-gp.gp-negative {
+  color: #e8a0a0;
+}
+
+.tab-highlight-value-xp {
+  color: #9ec8eb;
 }
 
 .tab-highlight-meta {
   grid-column: 1 / -1;
   font-size: 0.8rem;
   color: #b8a88a;
+  line-height: 1.35;
 }
 
-.tab-highlight-gp {
-  box-shadow: inset 3px 0 0 #c8a84b;
-}
-
-.tab-highlight-xp {
-  box-shadow: inset 3px 0 0 #78b4dc;
+.tab-highlight-empty {
+  grid-template-rows: auto auto;
 }
 
 .tab-highlight-empty .tab-highlight-meta {
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .tab-setup .controls {
@@ -363,12 +382,10 @@ a {
 
 .data-table tbody tr.profit-best {
   background: rgba(200, 168, 75, 0.12);
-  box-shadow: inset 3px 0 0 #c8a84b;
 }
 
 .data-table tbody tr.profit-best-xp {
   background: rgba(120, 180, 220, 0.1);
-  box-shadow: inset 3px 0 0 #78b4dc;
 }
 
 .data-table tbody tr.profit-best.profit-best-xp {
@@ -377,7 +394,16 @@ a {
     rgba(200, 168, 75, 0.12) 0%,
     rgba(120, 180, 220, 0.1) 100%
   );
-  box-shadow: inset 3px 0 0 #c8a84b, inset 6px 0 0 #78b4dc;
+}
+
+.data-table tbody tr .profit-best-cell.gp-positive {
+  color: #8fd4a0;
+  font-weight: bold;
+}
+
+.data-table tbody tr .profit-best-xp-cell {
+  color: #9ec8eb;
+  font-weight: bold;
 }
 
 .rune-name {

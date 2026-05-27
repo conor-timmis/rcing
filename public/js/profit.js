@@ -89,33 +89,47 @@ function profitThroughputText(form) {
   );
 }
 
+function profitHighlightMeta(row) {
+  const parts = [row.method];
+  if (row.profit != null) parts.push(`${formatGp(row.profit)}/ess`);
+  parts.push(`Lvl ${row.rune.reqLevel}`);
+  return parts.join(" · ");
+}
+
 function renderProfitHighlights(bestGpRow, bestXpRow) {
   const container = document.getElementById("profit-highlights");
   if (!container) return;
 
   const gpCard = bestGpRow
-    ? `<article class="tab-highlight tab-highlight-gp">
-        <span class="tab-highlight-label">Best GP/hr</span>
-        <strong class="tab-highlight-title">${bestGpRow.rune.name}</strong>
-        <span class="tab-highlight-value">${formatGp(bestGpRow.gpHour)}/hr</span>
-        <span class="tab-highlight-meta">${bestGpRow.method}</span>
-      </article>`
-    : `<article class="tab-highlight tab-highlight-gp tab-highlight-empty">
-        <span class="tab-highlight-label">Best GP/hr</span>
-        <span class="tab-highlight-meta">No profitable method at this level</span>
-      </article>`;
+    ? tabHighlightCard({
+        kind: "gp",
+        label: "Net GP/hr",
+        titleHtml: runeNameCell(bestGpRow.rune.name),
+        valueHtml: `${formatGp(bestGpRow.gpHour)}/hr`,
+        valueClass: gpSignClass(bestGpRow.gpHour),
+        meta: profitHighlightMeta(bestGpRow),
+      })
+    : tabHighlightCard({
+        kind: "gp",
+        label: "Net GP/hr",
+        empty: true,
+        meta: "No craftable method at this level",
+      });
 
   const xpCard = bestXpRow
-    ? `<article class="tab-highlight tab-highlight-xp">
-        <span class="tab-highlight-label">Best XP/hr</span>
-        <strong class="tab-highlight-title">${bestXpRow.rune.name}</strong>
-        <span class="tab-highlight-value">${formatXp(bestXpRow.xpHour)}/hr</span>
-        <span class="tab-highlight-meta">${bestXpRow.method}</span>
-      </article>`
-    : `<article class="tab-highlight tab-highlight-xp tab-highlight-empty">
-        <span class="tab-highlight-label">Best XP/hr</span>
-        <span class="tab-highlight-meta">No craftable method at this level</span>
-      </article>`;
+    ? tabHighlightCard({
+        kind: "xp",
+        label: "Net XP/hr",
+        titleHtml: runeNameCell(bestXpRow.rune.name),
+        valueHtml: `${formatXp(bestXpRow.xpHour)}/hr`,
+        meta: profitHighlightMeta(bestXpRow),
+      })
+    : tabHighlightCard({
+        kind: "xp",
+        label: "Net XP/hr",
+        empty: true,
+        meta: "No craftable method at this level",
+      });
 
   container.innerHTML = gpCard + xpCard;
 }
@@ -134,8 +148,8 @@ function appendProfitRow(tbody, row, { isBestGp, isBestXp }) {
     <td>${formatGp(row.price)}</td>
     <td>${canCraft ? row.outputPerEssence ?? "—" : "—"}</td>
     <td class="${gpSignClass(profit)}">${profitCellContent(row)}</td>
-    <td class="${gpSignClass(gpHour)}">${canCraft && gpHour != null ? formatGp(gpHour) : "—"}</td>
-    <td>${canCraft && xpHour != null ? formatXp(xpHour) + "/hr" : "—"}</td>
+    <td class="${gpSignClass(gpHour)}${isBestGp ? " profit-best-cell" : ""}">${canCraft && gpHour != null ? formatGp(gpHour) : "—"}</td>
+    <td class="${isBestXp ? "profit-best-xp-cell" : ""}">${canCraft && xpHour != null ? formatXp(xpHour) + "/hr" : "—"}</td>
   `;
   tbody.appendChild(tr);
 }

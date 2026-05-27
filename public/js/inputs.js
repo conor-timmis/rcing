@@ -54,6 +54,49 @@ function bindControl(id, onUpdate) {
 const PRICES_API = "/api/prices";
 const PRICES_LOAD_ERROR = "Could not load prices. Is the server running?";
 
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function tabHighlightCard({
+  kind = "gp",
+  label,
+  titleHtml = "",
+  valueHtml = "",
+  meta = "",
+  empty = false,
+  valueClass = "",
+}) {
+  const kindClass = kind === "xp" ? "tab-highlight-xp" : "tab-highlight-gp";
+  const emptyClass = empty ? " tab-highlight-empty" : "";
+
+  if (empty) {
+    return `<article class="tab-highlight ${kindClass}${emptyClass}">
+      <span class="tab-highlight-label">${escapeHtml(label)}</span>
+      <span class="tab-highlight-meta">${escapeHtml(meta)}</span>
+    </article>`;
+  }
+
+  const valueClasses = [
+    "tab-highlight-value",
+    kind === "xp" ? "tab-highlight-value-xp" : "tab-highlight-value-gp",
+    valueClass,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return `<article class="tab-highlight ${kindClass}">
+    <span class="tab-highlight-label">${escapeHtml(label)}</span>
+    <div class="tab-highlight-title">${titleHtml}</div>
+    <span class="${valueClasses}">${valueHtml}</span>
+    <span class="tab-highlight-meta">${escapeHtml(meta)}</span>
+  </article>`;
+}
+
 function setTabPriceStatus(statusId, { message = "", isError = false } = {}) {
   const status = document.getElementById(statusId);
   if (!status) return;
