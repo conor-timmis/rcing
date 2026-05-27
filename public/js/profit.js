@@ -66,32 +66,58 @@ function profitOptionsFromForm() {
   };
 }
 
-function bestProfitLabel(bestRow) {
-  if (!bestRow) return "No profitable methods at this level with current prices.";
-  return `Best GP/hr: ${bestRow.rune.name} · ${formatGp(bestRow.gpHour)}/hr`;
-}
-
-function bestXpLabel(bestRow) {
-  if (!bestRow) return "No craftable methods at this level.";
-  return `Best XP/hr: ${bestRow.rune.name} · ${formatXp(bestRow.xpHour)}/hr`;
-}
-
-function profitStatusText(form, bestGpRow, bestXpRow) {
-  const eyeLabel = form.eyeEnabled ? " · Eye set ON" : "";
-  const daeyaltLabel = form.daeyalt ? " · Daeyalt essence" : "";
-  const capeLabel = form.rcCape ? " · RC cape" : "";
-  const comboLabel = form.bindingNecklace
-    ? " · Binding necklace ON"
-    : " · 50% combo success";
-  const imbueLabel = form.magicImbue ? " · Magic Imbue ON" : "";
+function profitSetupSummary(form) {
+  const badges = [];
+  if (form.eyeEnabled) badges.push("Eye");
+  if (form.daeyalt) badges.push("Daeyalt");
+  if (form.rcCape) badges.push("RC cape");
+  if (form.bindingNecklace) badges.push("Binding necklace");
+  else badges.push("50% combos");
+  if (form.magicImbue) badges.push("Magic Imbue");
+  const badgeText = badges.length ? ` · ${badges.join(", ")}` : "";
 
   return (
-    `${bestProfitLabel(bestGpRow)} · ${bestXpLabel(bestXpRow)} · ` +
-    `Level ${form.rcLevel}${eyeLabel}${daeyaltLabel}${capeLabel}${comboLabel}${imbueLabel}` +
-    ` · ${form.pouch.name} · ${form.pouch.essencesPerTrip.toLocaleString()} ess/trip` +
-    ` · ${form.tripSeconds}s/trip ≈ ${form.tripsHour.toFixed(1)} trips/hr` +
-    ` = ${form.essencesPerHour.toLocaleString()} ess/hr`
+    `Setup · Lvl ${form.rcLevel} · ${form.pouch.essencesPerTrip.toLocaleString()} ess/trip` +
+    ` · ${form.tripSeconds}s · ${form.essencesPerHour.toLocaleString()} ess/hr${badgeText}`
   );
+}
+
+function profitThroughputText(form) {
+  return (
+    `${form.pouch.name} · ${form.tripsHour.toFixed(1)} trips/hr` +
+    ` · ${form.essencesPerHour.toLocaleString()} ess/hr`
+  );
+}
+
+function renderProfitHighlights(bestGpRow, bestXpRow) {
+  const container = document.getElementById("profit-highlights");
+  if (!container) return;
+
+  const gpCard = bestGpRow
+    ? `<article class="altar-highlight altar-highlight-gp">
+        <span class="altar-highlight-label">Best GP/hr</span>
+        <strong class="altar-highlight-rune">${bestGpRow.rune.name}</strong>
+        <span class="altar-highlight-value">${formatGp(bestGpRow.gpHour)}/hr</span>
+        <span class="altar-highlight-meta">${bestGpRow.method}</span>
+      </article>`
+    : `<article class="altar-highlight altar-highlight-gp altar-highlight-empty">
+        <span class="altar-highlight-label">Best GP/hr</span>
+        <span class="altar-highlight-meta">No profitable method at this level</span>
+      </article>`;
+
+  const xpCard = bestXpRow
+    ? `<article class="altar-highlight altar-highlight-xp">
+        <span class="altar-highlight-label">Best XP/hr</span>
+        <strong class="altar-highlight-rune">${bestXpRow.rune.name}</strong>
+        <span class="altar-highlight-value">${formatXp(bestXpRow.xpHour)}/hr</span>
+        <span class="altar-highlight-meta">${bestXpRow.method}</span>
+      </article>`
+    : `<article class="altar-highlight altar-highlight-xp altar-highlight-empty">
+        <span class="altar-highlight-label">Best XP/hr</span>
+        <span class="altar-highlight-meta">No craftable method at this level</span>
+      </article>`;
+
+  container.innerHTML = gpCard + xpCard;
 }
 
 function appendProfitRow(tbody, row, { isBestGp, isBestXp }) {
@@ -116,7 +142,9 @@ function appendProfitRow(tbody, row, { isBestGp, isBestXp }) {
 
 function renderProfit(prices) {
   const tbody = document.querySelector("#profit-table tbody");
-  const status = document.getElementById("profit-status");
+  const throughput = document.getElementById("profit-throughput");
+  const setupSummary = document.getElementById("profit-setup-summary");
+  const craftableOnly = document.getElementById("profit-craftable-only")?.checked ?? true;
   tbody.innerHTML = "";
 
   const form = profitOptionsFromForm();
@@ -127,13 +155,18 @@ function renderProfit(prices) {
 
   const bestGpRow = findBestProfitRow(rows);
   const bestXpRow = findBestXpRow(rows);
-  for (const row of rows) {
+  const visibleRows = craftableOnly ? rows.filter((row) => row.canCraft) : rows;
+
+  for (const row of visibleRows) {
     appendProfitRow(tbody, row, {
       isBestGp: bestGpRow && row === bestGpRow,
       isBestXp: bestXpRow && row === bestXpRow,
     });
   }
-  status.textContent = profitStatusText(form, bestGpRow, bestXpRow);
+
+  renderProfitHighlights(bestGpRow, bestXpRow);
+  if (throughput) throughput.textContent = profitThroughputText(form);
+  if (setupSummary) setupSummary.textContent = profitSetupSummary(form);
 }
 
 function bindProfitControls() {
@@ -162,6 +195,7 @@ function bindProfitControls() {
     "pouch-setup",
     "combo-binding-toggle",
     "combo-imbue-toggle",
+    "profit-craftable-only",
   ]) {
     bindControl(id, onUpdate);
   }
