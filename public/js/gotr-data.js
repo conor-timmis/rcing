@@ -20,7 +20,6 @@ const GOTR_ITEM_IDS = {
   deathTalisman: 1456,
 };
 
-/** Approximate RC XP/hr on mass worlds (OSRS Wiki / community benchmarks). */
 const GOTR_XP_TIERS = [
   { level: 27, xpPerHour: 22_000 },
   { level: 40, xpPerHour: 28_000 },
@@ -31,12 +30,8 @@ const GOTR_XP_TIERS = [
   { level: 99, xpPerHour: 65_000 },
 ];
 
-const GOTR_TABLE_WEIGHT = {
-  standard: 140,
-  boosted: 125,
-};
+const GOTR_TABLE_WEIGHT = { standard: 140, boosted: 125 };
 
-/** Main Rewards Guardian table (weights from OSRS Wiki). */
 const GOTR_MAIN_REWARDS = [
   { kind: "rune", itemId: 556, weight: 4, qtyMin: 400, qtyMax: 500, reqLevel: 1 },
   { kind: "rune", itemId: 555, weight: 4, qtyMin: 400, qtyMax: 500, reqLevel: 5 },
@@ -50,38 +45,10 @@ const GOTR_MAIN_REWARDS = [
   { kind: "rune", itemId: 563, weight: 10, qtyMin: 5, qtyMax: 120, reqLevel: 54 },
   { kind: "rune", itemId: 560, weight: 10, qtyMin: 5, qtyMax: 120, reqLevel: 65 },
   { kind: "rune", itemId: 565, weight: 10, qtyMin: 5, qtyMax: 120, reqLevel: 77 },
-  {
-    kind: "stack",
-    name: "Abyssal pearls",
-    itemId: GOTR_ITEM_IDS.abyssalPearls,
-    weight: 18,
-    qtyMin: 14,
-    qtyMax: 16,
-  },
-  {
-    kind: "stack",
-    name: "Intricate pouch",
-    itemId: GOTR_ITEM_IDS.intricatePouch,
-    weight: 5,
-    qtyMin: 1,
-    qtyMax: 1,
-  },
-  {
-    kind: "stack",
-    name: "Abyssal ashes",
-    itemId: GOTR_ITEM_IDS.abyssalAshes,
-    weight: 1,
-    qtyMin: 1,
-    qtyMax: 1,
-  },
-  {
-    kind: "stack",
-    name: "Needle",
-    itemId: GOTR_ITEM_IDS.needle,
-    weight: 1,
-    qtyMin: 1,
-    qtyMax: 1,
-  },
+  { kind: "stack", name: "Abyssal pearls", itemId: GOTR_ITEM_IDS.abyssalPearls, weight: 18, qtyMin: 14, qtyMax: 16 },
+  { kind: "stack", name: "Intricate pouch", itemId: GOTR_ITEM_IDS.intricatePouch, weight: 5, qtyMin: 1, qtyMax: 1 },
+  { kind: "stack", name: "Abyssal ashes", itemId: GOTR_ITEM_IDS.abyssalAshes, weight: 1, qtyMin: 1, qtyMax: 1 },
+  { kind: "stack", name: "Needle", itemId: GOTR_ITEM_IDS.needle, weight: 1, qtyMin: 1, qtyMax: 1 },
 ];
 
 const GOTR_TALISMAN_TABLE = {
@@ -102,12 +69,10 @@ const GOTR_TALISMAN_TABLE = {
   ],
 };
 
-/** Rare table — rolled separately each search (OSRS Wiki). */
 const GOTR_RARE_REWARDS = [
   { name: "Catalytic talisman", itemId: GOTR_ITEM_IDS.catalyticTalisman, rate: 1 / 200 },
 ];
 
-/** Optional combo-rune inputs per hour (wiki money-making guide reference setup). */
 const GOTR_NPC_CONTACT_CASTS = 3;
 const GOTR_NPC_CONTACT_COSTS = [
   { itemId: 9075, qty: 2, name: "Astral rune" },
@@ -148,6 +113,5 @@ function gotrRewardName(entry) {
   if (entry.name) return entry.name;
   if (GOTR_ITEM_NAMES[entry.itemId]) return GOTR_ITEM_NAMES[entry.itemId];
   const rune = GOTR_RUNE_BY_ITEM_ID[entry.itemId];
-  if (rune) return rune.name;
-  return `Item ${entry.itemId}`;
+  return rune ? rune.name : `Item ${entry.itemId}`;
 }

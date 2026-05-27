@@ -3,10 +3,7 @@ function glossarySuffix(rune) {
 }
 
 function trendDisplay(t) {
-  if (t.pct !== 0 && t.dir !== "flat") {
-    return `${t.label} ${Math.abs(t.pct).toFixed(1)}%`;
-  }
-  return t.label;
+  return t.pct !== 0 && t.dir !== "flat" ? `${t.label} ${Math.abs(t.pct).toFixed(1)}%` : t.label;
 }
 
 function appendGlossaryRow(tbody, rune, prices) {
@@ -14,10 +11,8 @@ function appendGlossaryRow(tbody, rune, prices) {
   const day = prices.day[rune.itemId];
   const price = midPrice(latest);
   const t = trend(latest, day);
-
   const tr = document.createElement("tr");
   if (price == null) tr.classList.add("unavailable");
-
   tr.innerHTML = `
     <td>${runeNameCell(rune.name, { suffix: glossarySuffix(rune) })}</td>
     <td>${formatGp(price)}</td>
@@ -30,21 +25,10 @@ function renderGlossary(prices) {
   const tbody = document.querySelector("#glossary-table tbody");
   const status = document.getElementById("glossary-status");
   tbody.innerHTML = "";
-
-  for (const rune of [...RUNES, ...COMBINATION_RUNES]) {
-    appendGlossaryRow(tbody, rune, prices);
-  }
-
-  const when = prices.cachedAt
-    ? new Date(prices.cachedAt).toLocaleTimeString()
-    : "now";
-  status.textContent = `Updated ${when}`;
+  for (const rune of [...RUNES, ...COMBINATION_RUNES]) appendGlossaryRow(tbody, rune, prices);
+  status.textContent = `Updated ${prices.cachedAt ? new Date(prices.cachedAt).toLocaleTimeString() : "now"}`;
 }
 
 async function loadGlossary(initialPrices = null) {
-  return loadPricesForTab({
-    initialPrices,
-    statusId: "glossary-status",
-    render: renderGlossary,
-  });
+  return loadPricesForTab({ initialPrices, statusId: "glossary-status", render: renderGlossary });
 }

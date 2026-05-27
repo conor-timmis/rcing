@@ -1,6 +1,3 @@
-let cachedPrices = null;
-let profitControlsBound = false;
-
 const PROFIT_PRESET_FIELDS = [
   { id: "rc-level", type: "int" },
   { id: "eye-toggle", type: "bool" },
@@ -66,29 +63,6 @@ function profitOptionsFromForm() {
   };
 }
 
-function profitSetupSummary(form) {
-  const badges = [];
-  if (form.eyeEnabled) badges.push("Eye");
-  if (form.daeyalt) badges.push("Daeyalt");
-  if (form.rcCape) badges.push("RC cape");
-  if (form.bindingNecklace) badges.push("Binding necklace");
-  else badges.push("50% combos");
-  if (form.magicImbue) badges.push("Magic Imbue");
-  const badgeText = badges.length ? ` · ${badges.join(", ")}` : "";
-
-  return (
-    `Setup · Lvl ${form.rcLevel} · ${form.pouch.essencesPerTrip.toLocaleString()} ess/trip` +
-    ` · ${form.tripSeconds}s · ${form.essencesPerHour.toLocaleString()} ess/hr${badgeText}`
-  );
-}
-
-function profitThroughputText(form) {
-  return (
-    `${form.pouch.name} · ${form.tripsHour.toFixed(1)} trips/hr` +
-    ` · ${form.essencesPerHour.toLocaleString()} ess/hr`
-  );
-}
-
 function profitHighlightMeta(row) {
   const parts = [row.method];
   if (row.profit != null) parts.push(`${formatGp(row.profit)}/ess`);
@@ -96,42 +70,31 @@ function profitHighlightMeta(row) {
   return parts.join(" · ");
 }
 
+function profitHighlightCard(kind, bestRow) {
+  if (bestRow) {
+    return tabHighlightCard({
+      kind,
+      label: kind === "gp" ? "Net GP/hr" : "Net XP/hr",
+      titleHtml: runeNameCell(bestRow.rune.name),
+      valueHtml: kind === "gp"
+        ? `${formatGp(bestRow.gpHour)}/hr`
+        : `${formatXp(bestRow.xpHour)}/hr`,
+      valueClass: kind === "gp" ? gpSignClass(bestRow.gpHour) : "",
+      meta: profitHighlightMeta(bestRow),
+    });
+  }
+  return tabHighlightCard({
+    kind,
+    label: kind === "gp" ? "Net GP/hr" : "Net XP/hr",
+    empty: true,
+    meta: "No craftable method at this level",
+  });
+}
+
 function renderProfitHighlights(bestGpRow, bestXpRow) {
   const container = document.getElementById("profit-highlights");
   if (!container) return;
-
-  const gpCard = bestGpRow
-    ? tabHighlightCard({
-        kind: "gp",
-        label: "Net GP/hr",
-        titleHtml: runeNameCell(bestGpRow.rune.name),
-        valueHtml: `${formatGp(bestGpRow.gpHour)}/hr`,
-        valueClass: gpSignClass(bestGpRow.gpHour),
-        meta: profitHighlightMeta(bestGpRow),
-      })
-    : tabHighlightCard({
-        kind: "gp",
-        label: "Net GP/hr",
-        empty: true,
-        meta: "No craftable method at this level",
-      });
-
-  const xpCard = bestXpRow
-    ? tabHighlightCard({
-        kind: "xp",
-        label: "Net XP/hr",
-        titleHtml: runeNameCell(bestXpRow.rune.name),
-        valueHtml: `${formatXp(bestXpRow.xpHour)}/hr`,
-        meta: profitHighlightMeta(bestXpRow),
-      })
-    : tabHighlightCard({
-        kind: "xp",
-        label: "Net XP/hr",
-        empty: true,
-        meta: "No craftable method at this level",
-      });
-
-  container.innerHTML = gpCard + xpCard;
+  container.innerHTML = profitHighlightCard("gp", bestGpRow) + profitHighlightCard("xp", bestXpRow);
 }
 
 function appendProfitRow(tbody, row, { isBestGp, isBestXp }) {
@@ -179,52 +142,38 @@ function renderProfit(prices) {
   }
 
   renderProfitHighlights(bestGpRow, bestXpRow);
-  if (throughput) throughput.textContent = profitThroughputText(form);
-  if (setupSummary) setupSummary.textContent = profitSetupSummary(form);
+  if (throughput) {
+    throughput.textContent = `${form.pouch.name} · ${form.tripsHour.toFixed(1)} trips/hr · ${form.essencesPerHour.toLocaleString()} ess/hr`;
+  }
+  if (setupSummary) {
+    const badges = [];
+    if (form.eyeEnabled) badges.push("Eye");
+    if (form.daeyalt) badges.push("Daeyalt");
+    if (form.rcCape) badges.push("RC cape");
+    badges.push(form.bindingNecklace ? "Binding necklace" : "50% combos");
+    if (form.magicImbue) badges.push("Magic Imbue");
+    setupSummary.textContent =
+      `Setup · Lvl ${form.rcLevel} · ${form.pouch.essencesPerTrip.toLocaleString()} ess/trip` +
+      ` · ${form.tripSeconds}s · ${form.essencesPerHour.toLocaleString()} ess/hr${joinBadges(badges)}`;
+  }
 }
 
-function bindProfitControls() {
-  if (profitControlsBound) return;
-  profitControlsBound = true;
-
+function bindProfitControls(onUpdate) {
   applyTabPreset("profit", PROFIT_PRESET_FIELDS);
-
-  const onUpdate = () => {
-    if (cachedPrices) renderProfit(cachedPrices);
-  };
-
   bindClampedInput("rc-level", { min: 1, max: LEVEL_MAX, fallback: 1, onUpdate });
-  bindClampedInput("trip-seconds", {
-    min: 1,
-    max: INPUT_MAX,
-    fallback: PROFIT_DEFAULT_TRIP_SECONDS,
-    onUpdate,
-  });
+  bindClampedInput("trip-seconds", { min: 1, max: INPUT_MAX, fallback: PROFIT_DEFAULT_TRIP_SECONDS, onUpdate });
   bindClampedInput("essences-trip", { min: 1, max: INPUT_MAX, fallback: 1, onUpdate });
-
   for (const id of [
-    "eye-toggle",
-    "daeyalt-toggle",
-    "rc-cape-toggle",
-    "pouch-setup",
-    "combo-binding-toggle",
-    "combo-imbue-toggle",
-    "profit-craftable-only",
+    "eye-toggle", "daeyalt-toggle", "rc-cape-toggle", "pouch-setup",
+    "combo-binding-toggle", "combo-imbue-toggle", "profit-craftable-only",
   ]) {
     bindControl(id, onUpdate);
   }
-
   bindPresetFields("profit", PROFIT_PRESET_FIELDS);
 }
 
-async function loadProfit(initialPrices = null) {
-  bindProfitControls();
-  return loadPricesForTab({
-    initialPrices,
-    statusId: "profit-status",
-    render: (prices) => {
-      cachedPrices = prices;
-      renderProfit(prices);
-    },
-  });
-}
+const loadProfit = initPriceTab({
+  statusId: "profit-status",
+  bindControls: bindProfitControls,
+  render: renderProfit,
+});

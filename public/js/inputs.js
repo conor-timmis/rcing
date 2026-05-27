@@ -216,3 +216,29 @@ function bindPresetFields(tab, fields, onSave) {
 
   return persist;
 }
+
+function joinBadges(badges) {
+  return badges.length ? ` · ${badges.join(", ")}` : "";
+}
+
+function initPriceTab({ statusId, bindControls, render }) {
+  let cachedPrices = null;
+  let bound = false;
+  const onUpdate = () => {
+    if (cachedPrices) render(cachedPrices);
+  };
+  return async (initialPrices = null) => {
+    if (!bound) {
+      bound = true;
+      bindControls(onUpdate);
+    }
+    return loadPricesForTab({
+      initialPrices,
+      statusId,
+      render: (prices) => {
+        cachedPrices = prices;
+        render(prices);
+      },
+    });
+  };
+}

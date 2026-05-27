@@ -1,17 +1,11 @@
 async function apiRequest(path, options = {}) {
   const res = await fetch(path, {
     credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers ?? {}),
-    },
+    headers: { "Content-Type": "application/json", ...(options.headers ?? {}) },
     ...options,
   });
-
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data.error || "Request failed.");
-  }
+  if (!res.ok) throw new Error(data.error || "Request failed.");
   return data;
 }
 
@@ -20,10 +14,7 @@ async function fetchMe() {
 }
 
 async function login(username, password) {
-  return apiRequest("/api/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ username, password }),
-  });
+  return apiRequest("/api/auth/login", { method: "POST", body: JSON.stringify({ username, password }) });
 }
 
 async function logout() {
@@ -31,10 +22,7 @@ async function logout() {
 }
 
 async function submitIssue(name, body) {
-  return apiRequest("/api/issues", {
-    method: "POST",
-    body: JSON.stringify({ name, body }),
-  });
+  return apiRequest("/api/issues", { method: "POST", body: JSON.stringify({ name, body }) });
 }
 
 async function fetchAllIssues() {

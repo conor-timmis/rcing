@@ -1,190 +1,3 @@
-/** Craftable runes with GE ids and multi-rune level breakpoints (OSRS Wiki). */
-const RUNES = [
-  {
-    id: "air",
-    name: "Air rune",
-    itemId: 556,
-    reqLevel: 1,
-    members: false,
-    multipliers: [1, 11, 22, 33, 44, 55, 66, 77, 88, 99],
-    xp: 5,
-    essenceItemId: 7936,
-    bestMethod: "Surface altar",
-  },
-  {
-    id: "mind",
-    name: "Mind rune",
-    itemId: 558,
-    reqLevel: 2,
-    members: false,
-    multipliers: [2, 14, 28, 42, 56, 70, 84, 98],
-    xp: 5.5,
-    essenceItemId: 7936,
-    bestMethod: "Surface altar",
-  },
-  {
-    id: "water",
-    name: "Water rune",
-    itemId: 555,
-    reqLevel: 5,
-    members: false,
-    multipliers: [5, 19, 38, 57, 76, 95],
-    xp: 6,
-    essenceItemId: 7936,
-    bestMethod: "Surface altar",
-  },
-  {
-    id: "earth",
-    name: "Earth rune",
-    itemId: 557,
-    reqLevel: 9,
-    members: false,
-    multipliers: [9, 26, 52, 78],
-    xp: 6.5,
-    essenceItemId: 7936,
-    bestMethod: "Surface altar",
-  },
-  {
-    id: "fire",
-    name: "Fire rune",
-    itemId: 554,
-    reqLevel: 14,
-    members: false,
-    multipliers: [14, 35, 70],
-    xp: 7,
-    essenceItemId: 7936,
-    bestMethod: "Surface altar",
-  },
-  {
-    id: "body",
-    name: "Body rune",
-    itemId: 559,
-    reqLevel: 20,
-    members: false,
-    multipliers: [20, 46, 92],
-    xp: 7.5,
-    essenceItemId: 7936,
-    bestMethod: "Surface altar",
-  },
-  {
-    id: "cosmic",
-    name: "Cosmic rune",
-    itemId: 564,
-    reqLevel: 27,
-    members: true,
-    multipliers: [27, 59],
-    xp: 8,
-    essenceItemId: 7936,
-    bestMethod: "Abyss",
-  },
-  {
-    id: "sunfire",
-    name: "Sunfire rune",
-    itemId: 28929,
-    reqLevel: 33,
-    members: true,
-    multipliers: [33, 49, 98],
-    xp: 9,
-    essenceItemId: 7936,
-    extraCosts: [
-      { itemId: 554, qty: 1, name: "Fire rune" },
-      { itemId: 28924, qty: 1, name: "Sunfire splinters" },
-    ],
-    bestMethod: "Sunfire altar",
-  },
-  {
-    id: "chaos",
-    name: "Chaos rune",
-    itemId: 562,
-    reqLevel: 35,
-    members: true,
-    multipliers: [35, 74],
-    xp: 8.5,
-    essenceItemId: 7936,
-    bestMethod: "Abyss",
-  },
-  {
-    id: "astral",
-    name: "Astral rune",
-    itemId: 9075,
-    reqLevel: 40,
-    members: true,
-    multipliers: [40, 82],
-    xp: 8.7,
-    essenceItemId: 7936,
-    bestMethod: "Lunar Isles",
-  },
-  {
-    id: "nature",
-    name: "Nature rune",
-    itemId: 561,
-    reqLevel: 44,
-    members: true,
-    multipliers: [44, 91],
-    xp: 9,
-    essenceItemId: 7936,
-    bestMethod: "Abyss",
-  },
-  {
-    id: "law",
-    name: "Law rune",
-    itemId: 563,
-    reqLevel: 54,
-    members: true,
-    multipliers: [54, 95],
-    xp: 9.5,
-    essenceItemId: 7936,
-    bestMethod: "Abyss",
-  },
-  {
-    id: "death",
-    name: "Death rune",
-    itemId: 560,
-    reqLevel: 65,
-    members: true,
-    multipliers: [65, 99],
-    xp: 10,
-    essenceItemId: 7936,
-    bestMethod: "Abyss",
-  },
-  {
-    id: "blood",
-    name: "Blood rune",
-    itemId: 565,
-    reqLevel: 77,
-    members: true,
-    multipliers: [77],
-    xp: 10.5,
-    essenceItemId: 7936,
-    bestMethod: "True Blood Altar",
-    note: "True Blood Altar uses pure essence",
-  },
-  {
-    id: "soul",
-    name: "Soul rune",
-    itemId: 566,
-    reqLevel: 90,
-    members: true,
-    multipliers: [90],
-    xp: 29.7,
-    essenceItemId: null,
-    freeInput: true,
-    bestMethod: "Dark altar",
-    note: "Uses dark essence fragments",
-  },
-  {
-    id: "wrath",
-    name: "Wrath rune",
-    itemId: 21880,
-    reqLevel: 95,
-    members: true,
-    multipliers: [95],
-    xp: 8,
-    essenceItemId: 7936,
-    bestMethod: "Myths' Guild",
-  },
-];
-
 const PURE_ESSENCE_ID = 7936;
 const WIKI_ICON = "https://oldschool.runescape.wiki/images";
 
@@ -230,182 +43,101 @@ const COLOSSAL_POUCH_TIERS = [
   { reqLevel: 25, capacity: 8 },
 ];
 
+function rune(id, name, itemId, reqLevel, multipliers, xp, bestMethod, extra = {}) {
+  return {
+    id,
+    name,
+    itemId,
+    reqLevel,
+    members: extra.members ?? true,
+    multipliers,
+    xp,
+    essenceItemId: extra.freeInput ? null : (extra.essence ?? PURE_ESSENCE_ID),
+    bestMethod,
+    ...(extra.extraCosts && { extraCosts: extra.extraCosts }),
+    ...(extra.freeInput && { freeInput: true }),
+    ...(extra.note && { note: extra.note }),
+  };
+}
+
+function comboRoute(altar, inputName, inputItemId, xp, talisman, extra = {}) {
+  const route = { altar, inputName, inputItemId, xp, ...extra };
+  if (talisman) {
+    route.talismanName = talisman.name;
+    route.talismanItemId = talisman.itemId;
+  }
+  return route;
+}
+
+function combo(id, name, itemId, reqLevel, routes) {
+  return { id, name, itemId, reqLevel, members: true, routes };
+}
+
+const RUNES = [
+  rune("air", "Air rune", 556, 1, [1, 11, 22, 33, 44, 55, 66, 77, 88, 99], 5, "Surface altar", { members: false }),
+  rune("mind", "Mind rune", 558, 2, [2, 14, 28, 42, 56, 70, 84, 98], 5.5, "Surface altar", { members: false }),
+  rune("water", "Water rune", 555, 5, [5, 19, 38, 57, 76, 95], 6, "Surface altar", { members: false }),
+  rune("earth", "Earth rune", 557, 9, [9, 26, 52, 78], 6.5, "Surface altar", { members: false }),
+  rune("fire", "Fire rune", 554, 14, [14, 35, 70], 7, "Surface altar", { members: false }),
+  rune("body", "Body rune", 559, 20, [20, 46, 92], 7.5, "Surface altar", { members: false }),
+  rune("cosmic", "Cosmic rune", 564, 27, [27, 59], 8, "Abyss"),
+  rune("sunfire", "Sunfire rune", 28929, 33, [33, 49, 98], 9, "Sunfire altar", {
+    extraCosts: [
+      { itemId: 554, qty: 1, name: "Fire rune" },
+      { itemId: 28924, qty: 1, name: "Sunfire splinters" },
+    ],
+  }),
+  rune("chaos", "Chaos rune", 562, 35, [35, 74], 8.5, "Abyss"),
+  rune("astral", "Astral rune", 9075, 40, [40, 82], 8.7, "Lunar Isles"),
+  rune("nature", "Nature rune", 561, 44, [44, 91], 9, "Abyss"),
+  rune("law", "Law rune", 563, 54, [54, 95], 9.5, "Abyss"),
+  rune("death", "Death rune", 560, 65, [65, 99], 10, "Abyss"),
+  rune("blood", "Blood rune", 565, 77, [77], 10.5, "True Blood Altar", {
+    note: "True Blood Altar uses pure essence",
+  }),
+  rune("soul", "Soul rune", 566, 90, [90], 29.7, "Dark altar", {
+    freeInput: true,
+    note: "Uses dark essence fragments",
+  }),
+  rune("wrath", "Wrath rune", 21880, 95, [95], 8, "Myths' Guild"),
+];
+
 const COMBINATION_RUNES = [
-  {
-    id: "mist",
-    name: "Mist rune",
-    itemId: 4695,
-    reqLevel: 6,
-    members: true,
-    routes: [
-      {
-        altar: "Air altar",
-        inputName: "Water rune",
-        inputItemId: ITEM_IDS.waterRune,
-        talismanName: "Water talisman",
-        talismanItemId: ITEM_IDS.waterTalisman,
-        xp: 8,
-      },
-      {
-        altar: "Water altar",
-        inputName: "Air rune",
-        inputItemId: ITEM_IDS.airRune,
-        talismanName: "Air talisman",
-        talismanItemId: ITEM_IDS.airTalisman,
-        xp: 8.5,
-      },
-    ],
-  },
-  {
-    id: "dust",
-    name: "Dust rune",
-    itemId: 4696,
-    reqLevel: 10,
-    members: true,
-    routes: [
-      {
-        altar: "Air altar",
-        inputName: "Earth rune",
-        inputItemId: ITEM_IDS.earthRune,
-        talismanName: "Earth talisman",
-        talismanItemId: ITEM_IDS.earthTalisman,
-        xp: 8.3,
-      },
-      {
-        altar: "Earth altar",
-        inputName: "Air rune",
-        inputItemId: ITEM_IDS.airRune,
-        talismanName: "Air talisman",
-        talismanItemId: ITEM_IDS.airTalisman,
-        xp: 9,
-      },
-    ],
-  },
-  {
-    id: "mud",
-    name: "Mud rune",
-    itemId: 4698,
-    reqLevel: 13,
-    members: true,
-    routes: [
-      {
-        altar: "Water altar",
-        inputName: "Earth rune",
-        inputItemId: ITEM_IDS.earthRune,
-        talismanName: "Earth talisman",
-        talismanItemId: ITEM_IDS.earthTalisman,
-        xp: 9.3,
-      },
-      {
-        altar: "Earth altar",
-        inputName: "Water rune",
-        inputItemId: ITEM_IDS.waterRune,
-        talismanName: "Water talisman",
-        talismanItemId: ITEM_IDS.waterTalisman,
-        xp: 9.5,
-      },
-    ],
-  },
-  {
-    id: "smoke",
-    name: "Smoke rune",
-    itemId: 4697,
-    reqLevel: 15,
-    members: true,
-    routes: [
-      {
-        altar: "Air altar",
-        inputName: "Fire rune",
-        inputItemId: ITEM_IDS.fireRune,
-        talismanName: "Fire talisman",
-        talismanItemId: ITEM_IDS.fireTalisman,
-        xp: 8.5,
-      },
-      {
-        altar: "Fire altar",
-        inputName: "Air rune",
-        inputItemId: ITEM_IDS.airRune,
-        talismanName: "Air talisman",
-        talismanItemId: ITEM_IDS.airTalisman,
-        xp: 9.5,
-      },
-    ],
-  },
-  {
-    id: "steam",
-    name: "Steam rune",
-    itemId: 4694,
-    reqLevel: 19,
-    members: true,
-    routes: [
-      {
-        altar: "Water altar",
-        inputName: "Fire rune",
-        inputItemId: ITEM_IDS.fireRune,
-        talismanName: "Fire talisman",
-        talismanItemId: ITEM_IDS.fireTalisman,
-        xp: 9.3,
-      },
-      {
-        altar: "Fire altar",
-        inputName: "Water rune",
-        inputItemId: ITEM_IDS.waterRune,
-        talismanName: "Water talisman",
-        talismanItemId: ITEM_IDS.waterTalisman,
-        xp: 10,
-      },
-    ],
-  },
-  {
-    id: "lava",
-    name: "Lava rune",
-    itemId: 4699,
-    reqLevel: 23,
-    members: true,
-    routes: [
-      {
-        altar: "Earth altar",
-        inputName: "Fire rune",
-        inputItemId: ITEM_IDS.fireRune,
-        talismanName: "Fire talisman",
-        talismanItemId: ITEM_IDS.fireTalisman,
-        xp: 10,
-      },
-      {
-        altar: "Fire altar",
-        inputName: "Earth rune",
-        inputItemId: ITEM_IDS.earthRune,
-        talismanName: "Earth talisman",
-        talismanItemId: ITEM_IDS.earthTalisman,
-        xp: 10.5,
-      },
-    ],
-  },
-  {
-    id: "aether",
-    name: "Aether rune",
-    itemId: 30843,
-    reqLevel: 90,
-    members: true,
-    routes: [
-      {
-        altar: "Cosmic altar",
-        access: "Abyss",
-        inputName: "Soul rune",
-        inputItemId: ITEM_IDS.soulRune,
-        requiresMagicImbue: true,
-        successCosts: [
-          { itemId: ITEM_IDS.aetherCatalyst, qty: 1, name: "Aether catalyst" },
-        ],
-        xp: 20,
-      },
-    ],
-  },
+  combo("mist", "Mist rune", 4695, 6, [
+    comboRoute("Air altar", "Water rune", ITEM_IDS.waterRune, 8, { name: "Water talisman", itemId: ITEM_IDS.waterTalisman }),
+    comboRoute("Water altar", "Air rune", ITEM_IDS.airRune, 8.5, { name: "Air talisman", itemId: ITEM_IDS.airTalisman }),
+  ]),
+  combo("dust", "Dust rune", 4696, 10, [
+    comboRoute("Air altar", "Earth rune", ITEM_IDS.earthRune, 8.3, { name: "Earth talisman", itemId: ITEM_IDS.earthTalisman }),
+    comboRoute("Earth altar", "Air rune", ITEM_IDS.airRune, 9, { name: "Air talisman", itemId: ITEM_IDS.airTalisman }),
+  ]),
+  combo("mud", "Mud rune", 4698, 13, [
+    comboRoute("Water altar", "Earth rune", ITEM_IDS.earthRune, 9.3, { name: "Earth talisman", itemId: ITEM_IDS.earthTalisman }),
+    comboRoute("Earth altar", "Water rune", ITEM_IDS.waterRune, 9.5, { name: "Water talisman", itemId: ITEM_IDS.waterTalisman }),
+  ]),
+  combo("smoke", "Smoke rune", 4697, 15, [
+    comboRoute("Air altar", "Fire rune", ITEM_IDS.fireRune, 8.5, { name: "Fire talisman", itemId: ITEM_IDS.fireTalisman }),
+    comboRoute("Fire altar", "Air rune", ITEM_IDS.airRune, 9.5, { name: "Air talisman", itemId: ITEM_IDS.airTalisman }),
+  ]),
+  combo("steam", "Steam rune", 4694, 19, [
+    comboRoute("Water altar", "Fire rune", ITEM_IDS.fireRune, 9.3, { name: "Fire talisman", itemId: ITEM_IDS.fireTalisman }),
+    comboRoute("Fire altar", "Water rune", ITEM_IDS.waterRune, 10, { name: "Water talisman", itemId: ITEM_IDS.waterTalisman }),
+  ]),
+  combo("lava", "Lava rune", 4699, 23, [
+    comboRoute("Earth altar", "Fire rune", ITEM_IDS.fireRune, 10, { name: "Fire talisman", itemId: ITEM_IDS.fireTalisman }),
+    comboRoute("Fire altar", "Earth rune", ITEM_IDS.earthRune, 10.5, { name: "Earth talisman", itemId: ITEM_IDS.earthTalisman }),
+  ]),
+  combo("aether", "Aether rune", 30843, 90, [
+    comboRoute("Cosmic altar", "Soul rune", ITEM_IDS.soulRune, 20, null, {
+      access: "Abyss",
+      requiresMagicImbue: true,
+      successCosts: [{ itemId: ITEM_IDS.aetherCatalyst, qty: 1, name: "Aether catalyst" }],
+    }),
+  ]),
 ];
 
 function runeIconUrl(name) {
-  const file = name.replace(/ /g, "_") + ".png";
-  return `${WIKI_ICON}/${file}`;
+  return `${WIKI_ICON}/${name.replace(/ /g, "_")}.png`;
 }
 
 function runeNameCell(name, { hideIconOnError = false, suffix = "" } = {}) {

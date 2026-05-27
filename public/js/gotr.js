@@ -1,6 +1,3 @@
-let gotrCachedPrices = null;
-let gotrControlsBound = false;
-
 const GOTR_MIN_LEVEL = 27;
 
 const GOTR_PRESET_FIELDS = [
@@ -25,23 +22,6 @@ function gotrOptionsFromForm() {
   };
 }
 
-function gotrSetupSummary(options) {
-  const badges = [];
-  if (options.boostedRates) badges.push("Boosted rates");
-  if (options.lantern) badges.push("Lantern");
-  if (options.comboRunes) badges.push("Combo costs");
-  const badgeText = badges.length ? ` · ${badges.join(", ")}` : "";
-
-  return (
-    `Setup · Lvl ${options.rcLevel} · ${options.gamesPerHour} games/hr` +
-    ` · ${options.elementalPoints} elem + ${options.catalyticPoints} cat pts/game${badgeText}`
-  );
-}
-
-function gotrThroughputText(options, summary) {
-  return `${summary.searchesPerHour} reward searches/hr · ${options.gamesPerHour} games/hr`;
-}
-
 function renderGotrHighlights(options, summary) {
   const container = document.getElementById("gotr-highlights");
   if (!container) return;
@@ -50,38 +30,31 @@ function renderGotrHighlights(options, summary) {
   const gpLabel = showNet ? "Net GP/hr" : "Reward GP/hr";
   const gpValue = showNet ? summary.netGpHour : summary.grossGpHour;
   const gpMetaParts = [`${formatGp(summary.gpPerSearch)}/search`];
-  if (showNet && summary.comboCosts != null) {
-    gpMetaParts.push(`Combo costs ${formatGp(summary.comboCosts)}/hr`);
-  } else if (options.comboRunes) {
-    gpMetaParts.push("Combo costs unknown");
-  } else if (!options.comboRunes) {
-    gpMetaParts.push(`Gross ${formatGp(summary.grossGpHour)}/hr`);
-  }
+  if (showNet && summary.comboCosts != null) gpMetaParts.push(`Combo costs ${formatGp(summary.comboCosts)}/hr`);
+  else if (options.comboRunes) gpMetaParts.push("Combo costs unknown");
+  else gpMetaParts.push(`Gross ${formatGp(summary.grossGpHour)}/hr`);
 
-  const gpCard = tabHighlightCard({
-    kind: "gp",
-    label: gpLabel,
-    titleHtml: "Guardians of the Rift",
-    valueHtml: `${formatGp(gpValue)}/hr`,
-    valueClass: gpValue >= 0 ? "gp-positive" : "gp-negative",
-    meta: gpMetaParts.join(" · "),
-  });
-
-  const xpCard = tabHighlightCard({
-    kind: "xp",
-    label: "Net XP/hr",
-    titleHtml: "Guardians of the Rift",
-    valueHtml: `~${formatXp(summary.rcXpPerHour)}/hr`,
-    meta: `${summary.searchesPerHour} reward searches/hr`,
-  });
-
-  container.innerHTML = gpCard + xpCard;
+  container.innerHTML =
+    tabHighlightCard({
+      kind: "gp",
+      label: gpLabel,
+      titleHtml: "Guardians of the Rift",
+      valueHtml: `${formatGp(gpValue)}/hr`,
+      valueClass: gpValue >= 0 ? "gp-positive" : "gp-negative",
+      meta: gpMetaParts.join(" · "),
+    }) +
+    tabHighlightCard({
+      kind: "xp",
+      label: "Net XP/hr",
+      titleHtml: "Guardians of the Rift",
+      valueHtml: `~${formatXp(summary.rcXpPerHour)}/hr`,
+      meta: `${summary.searchesPerHour} reward searches/hr`,
+    });
 }
 
 function appendGotrRow(tbody, row, searchesPerHour) {
   const tr = document.createElement("tr");
   const gpHour = row.gpPerSearch * searchesPerHour;
-
   tr.innerHTML = `
     <td>${runeNameCell(row.name, { hideIconOnError: true })}</td>
     <td>${formatChance(row.chance)}</td>
@@ -107,45 +80,32 @@ function renderGotr(prices) {
   }
 
   renderGotrHighlights(options, summary);
-  if (throughput) throughput.textContent = gotrThroughputText(options, summary);
-  if (setupSummary) setupSummary.textContent = gotrSetupSummary(options);
+  if (throughput) throughput.textContent = `${summary.searchesPerHour} reward searches/hr · ${options.gamesPerHour} games/hr`;
+  if (setupSummary) {
+    const badges = [];
+    if (options.boostedRates) badges.push("Boosted rates");
+    if (options.lantern) badges.push("Lantern");
+    if (options.comboRunes) badges.push("Combo costs");
+    setupSummary.textContent =
+      `Setup · Lvl ${options.rcLevel} · ${options.gamesPerHour} games/hr` +
+      ` · ${options.elementalPoints} elem + ${options.catalyticPoints} cat pts/game${joinBadges(badges)}`;
+  }
 }
 
-function bindGotrControls() {
-  if (gotrControlsBound) return;
-  gotrControlsBound = true;
-
+function bindGotrControls(onUpdate) {
   applyTabPreset("gotr", GOTR_PRESET_FIELDS);
-
-  const onUpdate = () => {
-    if (gotrCachedPrices) renderGotr(gotrCachedPrices);
-  };
-
-  bindClampedInput("gotr-rc-level", {
-    min: GOTR_MIN_LEVEL,
-    max: LEVEL_MAX,
-    fallback: GOTR_MIN_LEVEL,
-    onUpdate,
-  });
+  bindClampedInput("gotr-rc-level", { min: GOTR_MIN_LEVEL, max: LEVEL_MAX, fallback: GOTR_MIN_LEVEL, onUpdate });
   bindClampedInput("gotr-games-hour", { min: 1, max: INPUT_MAX, fallback: 1, onUpdate });
   bindClampedInput("gotr-elemental-points", { min: 0, max: INPUT_MAX, fallback: 1, onUpdate });
   bindClampedInput("gotr-catalytic-points", { min: 0, max: INPUT_MAX, fallback: 1, onUpdate });
-
   for (const id of ["gotr-boosted-rates", "gotr-lantern-toggle", "gotr-combo-toggle"]) {
     bindControl(id, onUpdate);
   }
-
   bindPresetFields("gotr", GOTR_PRESET_FIELDS);
 }
 
-async function loadGotr(initialPrices = null) {
-  bindGotrControls();
-  return loadPricesForTab({
-    initialPrices,
-    statusId: "gotr-status",
-    render: (prices) => {
-      gotrCachedPrices = prices;
-      renderGotr(prices);
-    },
-  });
-}
+const loadGotr = initPriceTab({
+  statusId: "gotr-status",
+  bindControls: bindGotrControls,
+  render: renderGotr,
+});

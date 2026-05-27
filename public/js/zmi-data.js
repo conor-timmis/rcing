@@ -1,12 +1,7 @@
-/** Guardians of the Rift — Ourania (ZMI) altar data (OSRS Wiki). */
-
-const ZMI_XP_MULTIPLIER = 1.7;
-const ZMI_DAEYALT_XP_MULTIPLIER = 1.5;
 const ZMI_DEFAULT_TRIP_SECONDS = 48;
 const ZMI_SECONDS_PER_HOUR = 3600;
 const ZMI_NPC_CONTACT_SECONDS_PER_POUCH = 15;
 const ZMI_ENIOLA_RUNES_PER_BANK = 20;
-/** Wiki Calculator:ZMI — average revenue +20–25% with medium Ardougne diary. */
 const ZMI_DIARY_AVG_OUTPUT_MULTIPLIER = 1.225;
 
 const ZMI_OURANIA_TELEPORT_COSTS = [

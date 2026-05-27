@@ -1,18 +1,32 @@
 const CORE_SCRIPTS = ["/js/runes.js", "/js/inputs.js", "/js/calc.js"];
-
 const TAB_SCRIPTS = {
   glossary: ["/js/glossary.js"],
   profit: ["/js/profit-data.js", "/js/profit.js"],
   zmi: ["/js/zmi-data.js", "/js/zmi.js"],
   gotr: ["/js/gotr-data.js", "/js/gotr.js"],
 };
+const TAB_STATUS_IDS = {
+  glossary: "glossary-status",
+  profit: "profit-status",
+  zmi: "zmi-status",
+  gotr: "gotr-status",
+};
+const TAB_LOADERS = {
+  glossary: (prices) => loadGlossary(prices),
+  profit: (prices) => loadProfit(prices),
+  zmi: (prices) => loadZmi(prices),
+  gotr: (prices) => loadGotr(prices),
+};
 
 const scriptPromises = new Map();
 let coreLoad = null;
+let sharedPrices = null;
+let pricesFetch = null;
+const readyTabs = new Set();
+const tabReadyPromises = new Map();
 
 function loadScript(src) {
   if (scriptPromises.has(src)) return scriptPromises.get(src);
-
   const promise = new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.src = src;
@@ -23,15 +37,12 @@ function loadScript(src) {
     };
     document.head.appendChild(script);
   });
-
   scriptPromises.set(src, promise);
   return promise;
 }
 
 async function loadScriptChain(sources) {
-  for (const src of sources) {
-    await loadScript(src);
-  }
+  for (const src of sources) await loadScript(src);
 }
 
 function loadCore() {
@@ -44,14 +55,8 @@ async function loadTabScripts(tab) {
   await loadScriptChain(TAB_SCRIPTS[tab] ?? []);
 }
 
-let sharedPrices = null;
-let pricesFetch = null;
-const readyTabs = new Set();
-const tabReadyPromises = new Map();
-
 async function getPrices() {
   if (sharedPrices) return sharedPrices;
-
   if (!pricesFetch) {
     pricesFetch = fetch("/api/prices")
       .then((res) => {
@@ -67,28 +72,16 @@ async function getPrices() {
         throw err;
       });
   }
-
   return pricesFetch;
 }
 
-const TAB_STATUS_IDS = {
-  glossary: "glossary-status",
-  profit: "profit-status",
-  zmi: "zmi-status",
-  gotr: "gotr-status",
-};
-
-function tabStatusId(tab) {
-  return TAB_STATUS_IDS[tab];
-}
-
 function showTabError(tab, message) {
+  const statusId = TAB_STATUS_IDS[tab];
   if (typeof setTabPriceStatus === "function") {
-    setTabPriceStatus(tabStatusId(tab), { message, isError: true });
+    setTabPriceStatus(statusId, { message, isError: true });
     return;
   }
-
-  const status = document.getElementById(tabStatusId(tab));
+  const status = document.getElementById(statusId);
   if (status) {
     status.textContent = message;
     status.hidden = false;
@@ -103,11 +96,8 @@ async function ensureTabReady(tab) {
   const promise = (async () => {
     try {
       await loadTabScripts(tab);
-      const prices = await getPrices();
-      if (tab === "glossary") await loadGlossary(prices);
-      else if (tab === "profit") await loadProfit(prices);
-      else if (tab === "zmi") await loadZmi(prices);
-      else if (tab === "gotr") await loadGotr(prices);
+      const loader = TAB_LOADERS[tab];
+      if (loader) await loader(await getPrices());
       readyTabs.add(tab);
     } catch {
       showTabError(tab, "Could not load this tab. Try refreshing the page.");
@@ -126,13 +116,11 @@ function switchTab(target) {
     tab.classList.toggle("active", isActive);
     tab.setAttribute("aria-selected", isActive);
   });
-
   document.querySelectorAll(".panel").forEach((panel) => {
     const isActive = panel.id === `panel-${target}`;
     panel.classList.toggle("active", isActive);
     panel.hidden = !isActive;
   });
-
   ensureTabReady(target);
 }
 
