@@ -39,17 +39,17 @@
         </table>
       </section>
 
-      <section id="panel-profit" class="panel altar-panel" role="tabpanel" hidden>
+      <section id="panel-profit" class="panel tab-panel" role="tabpanel" hidden>
         <details class="panel-details">
           <summary>How this tab works</summary>
           <p class="panel-note">GP and XP per essence and per hour at each altar. Method is the usual efficient route (e.g. Abyss for nature). XP is per essence used (Eye set adds runes, not XP). Daeyalt essence grants +50% XP.</p>
         </details>
 
-        <div class="altar-highlights" id="profit-highlights" aria-live="polite"></div>
-        <div class="status altar-throughput" id="profit-throughput"></div>
-        <div class="status" id="profit-status">Loading prices…</div>
+        <div class="tab-highlights" id="profit-highlights" aria-live="polite"></div>
+        <div class="status tab-throughput" id="profit-throughput"></div>
+        <div class="status" id="profit-status" hidden></div>
 
-        <details class="panel-details altar-setup" id="profit-setup">
+        <details class="panel-details tab-setup" id="profit-setup">
           <summary id="profit-setup-summary">Setup</summary>
           <div class="controls profit-controls">
             <fieldset class="control-group">
@@ -113,7 +113,7 @@
             </fieldset>
           </div>
 
-          <label class="toggle altar-filter">
+          <label class="toggle tab-filter">
             <input type="checkbox" id="profit-craftable-only" checked>
             Only show runes I can craft
           </label>
@@ -138,142 +138,154 @@
         </div>
       </section>
 
-      <section id="panel-zmi" class="panel" role="tabpanel" hidden>
-        <p class="panel-note">Ourania (ZMI) altar expected rewards and XP. Rune rates from the OSRS Wiki; prices are live GE. Excludes daeyalt mining time, pouch repair GP, and stamina costs. Daeyalt essence is untradeable — profit uses pure essence cost unless daeyalt mode (XP boost only). Ardougne diary uses wiki-average ~22.5% rune output boost.</p>
+      <section id="panel-zmi" class="panel tab-panel" role="tabpanel" hidden>
+        <div class="tab-highlights" id="zmi-highlights" aria-live="polite"></div>
+        <div class="status tab-throughput" id="zmi-throughput"></div>
+        <div class="status" id="zmi-status" hidden></div>
 
-        <div class="controls profit-controls">
-          <fieldset class="control-group">
-            <legend>Character</legend>
-            <label>
-              Runecraft level
-              <input type="number" id="zmi-rc-level" min="1" max="99" value="1">
-            </label>
+        <details class="panel-details tab-setup" id="zmi-setup">
+          <summary id="zmi-setup-summary">Setup</summary>
+          <div class="controls profit-controls">
+            <fieldset class="control-group">
+              <legend>Character</legend>
+              <label>
+                Runecraft level
+                <input type="number" id="zmi-rc-level" min="1" max="99" value="1">
+              </label>
 
-            <label class="toggle">
-              <input type="checkbox" id="zmi-eye-toggle">
-              Raiments of the Eye
-            </label>
+              <label class="toggle">
+                <input type="checkbox" id="zmi-eye-toggle">
+                Raiments of the Eye
+              </label>
 
-            <label class="toggle">
-              <input type="checkbox" id="zmi-daeyalt-toggle">
-              Daeyalt essence (XP only)
-            </label>
+              <label class="toggle">
+                <input type="checkbox" id="zmi-daeyalt-toggle">
+                Daeyalt essence (XP only)
+              </label>
 
-            <label class="toggle">
-              <input type="checkbox" id="zmi-diary-toggle">
-              Ardougne medium diary
-            </label>
-          </fieldset>
+              <label class="toggle">
+                <input type="checkbox" id="zmi-diary-toggle">
+                Ardougne medium diary
+              </label>
+            </fieldset>
 
-          <fieldset class="control-group">
-            <legend>Throughput</legend>
-            <label>
-              Pouch setup
-              <select id="zmi-pouch-setup">
-                <option value="inventory">Inventory only</option>
-                <option value="standard">Best standard pouches</option>
-                <option value="colossal">Colossal pouch</option>
-                <option value="manual">Manual essences / trip</option>
-              </select>
-            </label>
+            <fieldset class="control-group">
+              <legend>Throughput</legend>
+              <label>
+                Pouch setup
+                <select id="zmi-pouch-setup">
+                  <option value="inventory">Inventory only</option>
+                  <option value="standard">Best standard pouches</option>
+                  <option value="colossal">Colossal pouch</option>
+                  <option value="manual">Manual essences / trip</option>
+                </select>
+              </label>
 
-            <label>
-              Seconds / trip
-              <input type="number" id="zmi-trip-seconds" min="30" max="300" value="48" step="1">
-            </label>
+              <label>
+                Seconds / trip
+                <input type="number" id="zmi-trip-seconds" min="30" max="300" value="48" step="1">
+              </label>
 
-            <label>
-              Essences / trip
-              <input type="number" id="zmi-essences-trip" min="1" max="200" value="1" step="1" disabled>
-            </label>
-          </fieldset>
+              <label>
+                Essences / trip
+                <input type="number" id="zmi-essences-trip" min="1" max="200" value="1" step="1" disabled>
+              </label>
+            </fieldset>
 
-          <fieldset class="control-group">
-            <legend>Costs</legend>
-            <label class="toggle">
-              <input type="checkbox" id="zmi-supply-costs-toggle" checked>
-              Include teleport + banking costs
-            </label>
-          </fieldset>
+            <fieldset class="control-group">
+              <legend>Costs</legend>
+              <label class="toggle">
+                <input type="checkbox" id="zmi-supply-costs-toggle" checked>
+                Include teleport + banking costs
+              </label>
+            </fieldset>
+          </div>
+        </details>
+
+        <div class="table-scroll">
+          <table class="data-table data-table-compact" id="zmi-table">
+            <thead>
+              <tr>
+                <th>Rune</th>
+                <th class="col-detail">Chance / ess</th>
+                <th class="col-detail">Qty / ess</th>
+                <th class="col-detail">GP / ess</th>
+                <th>GP / hr</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
-
-        <div class="status" id="zmi-status">Loading prices…</div>
-        <table class="data-table" id="zmi-table">
-          <thead>
-            <tr>
-              <th>Rune</th>
-              <th>Chance / ess</th>
-              <th>Qty / ess</th>
-              <th>GP / ess</th>
-              <th>GP / hour</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
       </section>
 
-      <section id="panel-gotr" class="panel" role="tabpanel" hidden>
-        <p class="panel-note">Guardians of the Rift rewards and XP. Expected loot uses OSRS Wiki drop rates and live GE prices. Does not include runes crafted at altars during the game.</p>
+      <section id="panel-gotr" class="panel tab-panel" role="tabpanel" hidden>
+        <div class="tab-highlights" id="gotr-highlights" aria-live="polite"></div>
+        <div class="status tab-throughput" id="gotr-throughput"></div>
+        <div class="status" id="gotr-status" hidden></div>
 
-        <div class="controls profit-controls">
-          <fieldset class="control-group">
-            <legend>Character</legend>
-            <label>
-              Runecraft level
-              <input type="number" id="gotr-rc-level" min="27" max="99" value="27">
-            </label>
+        <details class="panel-details tab-setup" id="gotr-setup">
+          <summary id="gotr-setup-summary">Setup</summary>
+          <div class="controls profit-controls">
+            <fieldset class="control-group">
+              <legend>Character</legend>
+              <label>
+                Runecraft level
+                <input type="number" id="gotr-rc-level" min="27" max="99" value="27">
+              </label>
 
-            <label class="toggle">
-              <input type="checkbox" id="gotr-boosted-rates" checked>
-              Colossal / all pouches (boosted rates)
-            </label>
-          </fieldset>
+              <label class="toggle">
+                <input type="checkbox" id="gotr-boosted-rates" checked>
+                Colossal / all pouches (boosted rates)
+              </label>
+            </fieldset>
 
-          <fieldset class="control-group">
-            <legend>Throughput</legend>
-            <label>
-              Games / hour
-              <input type="number" id="gotr-games-hour" min="1" max="200" value="1" step="1">
-            </label>
+            <fieldset class="control-group">
+              <legend>Throughput</legend>
+              <label>
+                Games / hour
+                <input type="number" id="gotr-games-hour" min="1" max="200" value="1" step="1">
+              </label>
 
-            <label>
-              Elemental points / game
-              <input type="number" id="gotr-elemental-points" min="0" max="200" value="1" step="1">
-            </label>
+              <label>
+                Elemental points / game
+                <input type="number" id="gotr-elemental-points" min="0" max="200" value="1" step="1">
+              </label>
 
-            <label>
-              Catalytic points / game
-              <input type="number" id="gotr-catalytic-points" min="0" max="200" value="1" step="1">
-            </label>
-          </fieldset>
+              <label>
+                Catalytic points / game
+                <input type="number" id="gotr-catalytic-points" min="0" max="200" value="1" step="1">
+              </label>
+            </fieldset>
 
-          <fieldset class="control-group">
-            <legend>Strategy</legend>
-            <label class="toggle">
-              <input type="checkbox" id="gotr-lantern-toggle">
-              Abyssal lantern
-            </label>
+            <fieldset class="control-group">
+              <legend>Strategy</legend>
+              <label class="toggle">
+                <input type="checkbox" id="gotr-lantern-toggle">
+                Abyssal lantern
+              </label>
 
-            <label class="toggle">
-              <input type="checkbox" id="gotr-combo-toggle" checked>
-              Combination runes (input costs)
-            </label>
-          </fieldset>
+              <label class="toggle">
+                <input type="checkbox" id="gotr-combo-toggle" checked>
+                Combination runes (input costs)
+              </label>
+            </fieldset>
+          </div>
+        </details>
+
+        <div class="table-scroll">
+          <table class="data-table data-table-compact" id="gotr-table">
+            <thead>
+              <tr>
+                <th>Reward</th>
+                <th class="col-detail">Chance / search</th>
+                <th class="col-detail">Qty / search</th>
+                <th class="col-detail">GP / search</th>
+                <th>GP / hr</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
-
-        <div class="status" id="gotr-status">Loading prices…</div>
-        <table class="data-table" id="gotr-table">
-          <thead>
-            <tr>
-              <th>Reward</th>
-              <th>Chance / search</th>
-              <th>Qty / search</th>
-              <th>GP / search</th>
-              <th>GP / hour</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
       </section>
     </main>
 

@@ -94,27 +94,27 @@ function renderProfitHighlights(bestGpRow, bestXpRow) {
   if (!container) return;
 
   const gpCard = bestGpRow
-    ? `<article class="altar-highlight altar-highlight-gp">
-        <span class="altar-highlight-label">Best GP/hr</span>
-        <strong class="altar-highlight-rune">${bestGpRow.rune.name}</strong>
-        <span class="altar-highlight-value">${formatGp(bestGpRow.gpHour)}/hr</span>
-        <span class="altar-highlight-meta">${bestGpRow.method}</span>
+    ? `<article class="tab-highlight tab-highlight-gp">
+        <span class="tab-highlight-label">Best GP/hr</span>
+        <strong class="tab-highlight-title">${bestGpRow.rune.name}</strong>
+        <span class="tab-highlight-value">${formatGp(bestGpRow.gpHour)}/hr</span>
+        <span class="tab-highlight-meta">${bestGpRow.method}</span>
       </article>`
-    : `<article class="altar-highlight altar-highlight-gp altar-highlight-empty">
-        <span class="altar-highlight-label">Best GP/hr</span>
-        <span class="altar-highlight-meta">No profitable method at this level</span>
+    : `<article class="tab-highlight tab-highlight-gp tab-highlight-empty">
+        <span class="tab-highlight-label">Best GP/hr</span>
+        <span class="tab-highlight-meta">No profitable method at this level</span>
       </article>`;
 
   const xpCard = bestXpRow
-    ? `<article class="altar-highlight altar-highlight-xp">
-        <span class="altar-highlight-label">Best XP/hr</span>
-        <strong class="altar-highlight-rune">${bestXpRow.rune.name}</strong>
-        <span class="altar-highlight-value">${formatXp(bestXpRow.xpHour)}/hr</span>
-        <span class="altar-highlight-meta">${bestXpRow.method}</span>
+    ? `<article class="tab-highlight tab-highlight-xp">
+        <span class="tab-highlight-label">Best XP/hr</span>
+        <strong class="tab-highlight-title">${bestXpRow.rune.name}</strong>
+        <span class="tab-highlight-value">${formatXp(bestXpRow.xpHour)}/hr</span>
+        <span class="tab-highlight-meta">${bestXpRow.method}</span>
       </article>`
-    : `<article class="altar-highlight altar-highlight-xp altar-highlight-empty">
-        <span class="altar-highlight-label">Best XP/hr</span>
-        <span class="altar-highlight-meta">No craftable method at this level</span>
+    : `<article class="tab-highlight tab-highlight-xp tab-highlight-empty">
+        <span class="tab-highlight-label">Best XP/hr</span>
+        <span class="tab-highlight-meta">No craftable method at this level</span>
       </article>`;
 
   container.innerHTML = gpCard + xpCard;

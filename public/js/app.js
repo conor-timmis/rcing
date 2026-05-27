@@ -83,9 +83,15 @@ function tabStatusId(tab) {
 }
 
 function showTabError(tab, message) {
+  if (typeof setTabPriceStatus === "function") {
+    setTabPriceStatus(tabStatusId(tab), { message, isError: true });
+    return;
+  }
+
   const status = document.getElementById(tabStatusId(tab));
   if (status) {
     status.textContent = message;
+    status.hidden = false;
     status.classList.add("status-error");
   }
 }

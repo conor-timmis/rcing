@@ -128,23 +128,23 @@ a {
   padding: 0 14px 12px;
 }
 
-.altar-panel .status {
+.tab-panel .status {
   margin-bottom: 8px;
 }
 
-.altar-throughput {
+.tab-throughput {
   color: #8b7355;
   font-size: 0.8rem;
 }
 
-.altar-highlights {
+.tab-highlights {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
   margin-bottom: 14px;
 }
 
-.altar-highlight {
+.tab-highlight {
   display: grid;
   gap: 2px 8px;
   padding: 12px 14px;
@@ -154,7 +154,7 @@ a {
   grid-template-rows: auto auto auto;
 }
 
-.altar-highlight-label {
+.tab-highlight-label {
   grid-column: 1 / -1;
   font-size: 0.75rem;
   letter-spacing: 0.04em;
@@ -162,41 +162,41 @@ a {
   color: #8b7355;
 }
 
-.altar-highlight-rune {
+.tab-highlight-title {
   font-size: 1.05rem;
   font-weight: normal;
   color: #f0e6d2;
 }
 
-.altar-highlight-value {
+.tab-highlight-value {
   font-size: 1.05rem;
   color: #f0e6d2;
   text-align: right;
 }
 
-.altar-highlight-meta {
+.tab-highlight-meta {
   grid-column: 1 / -1;
   font-size: 0.8rem;
   color: #b8a88a;
 }
 
-.altar-highlight-gp {
+.tab-highlight-gp {
   box-shadow: inset 3px 0 0 #c8a84b;
 }
 
-.altar-highlight-xp {
+.tab-highlight-xp {
   box-shadow: inset 3px 0 0 #78b4dc;
 }
 
-.altar-highlight-empty .altar-highlight-meta {
+.tab-highlight-empty .tab-highlight-meta {
   margin-top: 4px;
 }
 
-.altar-setup .controls {
+.tab-setup .controls {
   margin-top: 12px;
 }
 
-.altar-filter {
+.tab-filter {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -562,11 +562,11 @@ a {
 }
 
 @media (max-width: 900px) {
-  .altar-panel .col-detail {
+  .tab-panel .col-detail {
     display: none;
   }
 
-  .altar-panel .col-method {
+  .tab-panel .col-method {
     max-width: 7rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -597,7 +597,7 @@ a {
     padding: 4px 6px;
   }
 
-  .altar-highlights {
+  .tab-highlights {
     grid-template-columns: 1fr;
   }
 }

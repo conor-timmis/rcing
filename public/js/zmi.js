@@ -39,28 +39,72 @@ function zmiOptionsFromForm() {
   };
 }
 
-function zmiStatusText(options, summary) {
-  const daeyaltNote = options.daeyalt ? " · Daeyalt (XP only, untradeable ess)" : "";
-  const diaryNote = options.ardougneDiary ? " · Ardougne diary ON" : "";
-  const eyeNote = options.eyeEnabled ? " · Eye set ON" : "";
-  const supplyNote = options.includeSupplyCosts
-    ? summary.supplyCostPerHour != null
-      ? ` · Supplies ${formatGp(summary.supplyCostPerHour)}/hr`
-      : " · Supply costs unknown"
-    : "";
-
-  const netNote =
-    summary.netGpHour != null ? ` · Net ${formatGp(summary.netGpHour)}/hr` : "";
+function zmiSetupSummary(options, summary) {
+  const badges = [];
+  if (options.eyeEnabled) badges.push("Eye");
+  if (options.daeyalt) badges.push("Daeyalt");
+  if (options.ardougneDiary) badges.push("Ardougne diary");
+  if (options.includeSupplyCosts) badges.push("Supply costs");
+  const badgeText = badges.length ? ` · ${badges.join(", ")}` : "";
 
   return (
-    `Level ${options.rcLevel}${daeyaltNote}${diaryNote}${eyeNote}` +
-    ` · ${summary.pouch.name} · ${summary.essencesPerHour.toLocaleString()} ess/hr` +
-    ` · ~${summary.rcXpPerHour.toLocaleString()} RC xp/hr` +
-    ` · ~${summary.grossGpHour?.toLocaleString() ?? "—"} gp/hr gross` +
-    netNote +
-    supplyNote +
-    ` · ${options.tripSeconds}s/trip`
+    `Setup · Lvl ${options.rcLevel} · ${summary.pouch.essencesPerTrip.toLocaleString()} ess/trip` +
+    ` · ${options.tripSeconds}s · ${summary.essencesPerHour.toLocaleString()} ess/hr${badgeText}`
   );
+}
+
+function zmiThroughputText(summary) {
+  return (
+    `${summary.pouch.name} · ${summary.tripsPerHour.toFixed(1)} trips/hr` +
+    ` · ${summary.essencesPerHour.toLocaleString()} ess/hr`
+  );
+}
+
+function renderZmiHighlights(options, summary) {
+  const container = document.getElementById("zmi-highlights");
+  if (!container) return;
+
+  const gpLabel = summary.netGpHour != null ? "Net GP/hr" : "Gross GP/hr";
+  const gpValue = summary.netGpHour ?? summary.grossGpHour;
+  const gpMetaParts = [];
+  if (summary.netGpHour != null && summary.grossGpHour != null) {
+    gpMetaParts.push(`Gross ${formatGp(summary.grossGpHour)}/hr`);
+  }
+  if (options.includeSupplyCosts && summary.supplyCostPerHour != null) {
+    gpMetaParts.push(`Supplies ${formatGp(summary.supplyCostPerHour)}/hr`);
+  } else if (options.includeSupplyCosts) {
+    gpMetaParts.push("Supply costs unknown");
+  }
+  if (summary.netGpPerEssence != null) {
+    gpMetaParts.push(`${formatGp(summary.netGpPerEssence)}/ess net`);
+  }
+
+  const gpCard =
+    gpValue != null
+      ? `<article class="tab-highlight tab-highlight-gp">
+          <span class="tab-highlight-label">${gpLabel}</span>
+          <strong class="tab-highlight-title">Ourania altar</strong>
+          <span class="tab-highlight-value">${formatGp(gpValue)}/hr</span>
+          <span class="tab-highlight-meta">${gpMetaParts.join(" · ") || "Mixed rune rewards"}</span>
+        </article>`
+      : `<article class="tab-highlight tab-highlight-gp tab-highlight-empty">
+          <span class="tab-highlight-label">${gpLabel}</span>
+          <span class="tab-highlight-meta">GP/hr unavailable (missing prices or costs)</span>
+        </article>`;
+
+  const xpMeta =
+    summary.xpPerEssence != null
+      ? `${formatXp(summary.xpPerEssence)}/ess · ${summary.essencesPerHour.toLocaleString()} ess/hr`
+      : `${summary.essencesPerHour.toLocaleString()} ess/hr`;
+
+  const xpCard = `<article class="tab-highlight tab-highlight-xp">
+      <span class="tab-highlight-label">RC XP/hr</span>
+      <strong class="tab-highlight-title">Ourania altar</strong>
+      <span class="tab-highlight-value">~${summary.rcXpPerHour.toLocaleString()}/hr</span>
+      <span class="tab-highlight-meta">${xpMeta}</span>
+    </article>`;
+
+  container.innerHTML = gpCard + xpCard;
 }
 
 function appendZmiRow(tbody, row, essencesPerHour) {
@@ -79,7 +123,8 @@ function appendZmiRow(tbody, row, essencesPerHour) {
 
 function renderZmi(prices) {
   const tbody = document.querySelector("#zmi-table tbody");
-  const status = document.getElementById("zmi-status");
+  const throughput = document.getElementById("zmi-throughput");
+  const setupSummary = document.getElementById("zmi-setup-summary");
   tbody.innerHTML = "";
 
   const options = zmiOptionsFromForm();
@@ -90,7 +135,9 @@ function renderZmi(prices) {
     appendZmiRow(tbody, row, summary.essencesPerHour);
   }
 
-  status.textContent = zmiStatusText(options, summary);
+  renderZmiHighlights(options, summary);
+  if (throughput) throughput.textContent = zmiThroughputText(summary);
+  if (setupSummary) setupSummary.textContent = zmiSetupSummary(options, summary);
 }
 
 function bindZmiControls() {

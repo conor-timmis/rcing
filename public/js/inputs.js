@@ -54,21 +54,32 @@ function bindControl(id, onUpdate) {
 const PRICES_API = "/api/prices";
 const PRICES_LOAD_ERROR = "Could not load prices. Is the server running?";
 
+function setTabPriceStatus(statusId, { message = "", isError = false } = {}) {
+  const status = document.getElementById(statusId);
+  if (!status) return;
+
+  status.textContent = message;
+  status.classList.toggle("status-error", isError);
+  status.hidden = !message;
+}
+
 async function loadPricesForTab({ initialPrices, statusId, render }) {
   if (initialPrices) {
+    setTabPriceStatus(statusId);
     render(initialPrices);
     return initialPrices;
   }
 
-  const status = document.getElementById(statusId);
+  setTabPriceStatus(statusId, { message: "Loading prices…" });
   try {
     const res = await fetch(PRICES_API);
     if (!res.ok) throw new Error("API error");
     const prices = await res.json();
+    setTabPriceStatus(statusId);
     render(prices);
     return prices;
   } catch {
-    if (status) status.textContent = PRICES_LOAD_ERROR;
+    setTabPriceStatus(statusId, { message: PRICES_LOAD_ERROR, isError: true });
     return null;
   }
 }

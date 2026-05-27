@@ -25,28 +25,54 @@ function gotrOptionsFromForm() {
   };
 }
 
-function gotrStatusText(options, summary) {
-  const comboNote = options.comboRunes
-    ? summary.comboCosts != null
-      ? ` · Combo costs ${formatGp(summary.comboCosts)}/hr`
-      : " · Combo costs unknown"
-    : "";
-
-  const netNote =
-    options.comboRunes && summary.netGpHour != null
-      ? ` · Net ${formatGp(summary.netGpHour)}/hr`
-      : "";
+function gotrSetupSummary(options) {
+  const badges = [];
+  if (options.boostedRates) badges.push("Boosted rates");
+  if (options.lantern) badges.push("Lantern");
+  if (options.comboRunes) badges.push("Combo costs");
+  const badgeText = badges.length ? ` · ${badges.join(", ")}` : "";
 
   return (
-    `Level ${options.rcLevel} · ${summary.searchesPerHour} reward searches/hr` +
-    ` · ~${summary.rcXpPerHour.toLocaleString()} RC xp/hr` +
-    ` · ~${summary.grossGpHour.toLocaleString()} gp/hr rewards` +
-    netNote +
-    comboNote +
-    ` · ${options.elementalPoints} elem + ${options.catalyticPoints} cat pts/game` +
-    (options.lantern ? " · Lantern ON" : "") +
-    (options.boostedRates ? " · Boosted rates" : "")
+    `Setup · Lvl ${options.rcLevel} · ${options.gamesPerHour} games/hr` +
+    ` · ${options.elementalPoints} elem + ${options.catalyticPoints} cat pts/game${badgeText}`
   );
+}
+
+function gotrThroughputText(options, summary) {
+  return `${summary.searchesPerHour} reward searches/hr · ${options.gamesPerHour} games/hr`;
+}
+
+function renderGotrHighlights(options, summary) {
+  const container = document.getElementById("gotr-highlights");
+  if (!container) return;
+
+  const showNet = options.comboRunes && summary.netGpHour != null;
+  const gpLabel = showNet ? "Net GP/hr" : "Reward GP/hr";
+  const gpValue = showNet ? summary.netGpHour : summary.grossGpHour;
+  const gpMetaParts = [`${formatGp(summary.gpPerSearch)}/search`];
+  if (showNet && summary.comboCosts != null) {
+    gpMetaParts.push(`Combo costs ${formatGp(summary.comboCosts)}/hr`);
+  } else if (options.comboRunes) {
+    gpMetaParts.push("Combo costs unknown");
+  } else if (!options.comboRunes) {
+    gpMetaParts.push(`Gross ${formatGp(summary.grossGpHour)}/hr`);
+  }
+
+  const gpCard = `<article class="tab-highlight tab-highlight-gp">
+      <span class="tab-highlight-label">${gpLabel}</span>
+      <strong class="tab-highlight-title">Guardians of the Rift</strong>
+      <span class="tab-highlight-value">${formatGp(gpValue)}/hr</span>
+      <span class="tab-highlight-meta">${gpMetaParts.join(" · ")}</span>
+    </article>`;
+
+  const xpCard = `<article class="tab-highlight tab-highlight-xp">
+      <span class="tab-highlight-label">RC XP/hr</span>
+      <strong class="tab-highlight-title">Guardians of the Rift</strong>
+      <span class="tab-highlight-value">~${summary.rcXpPerHour.toLocaleString()}/hr</span>
+      <span class="tab-highlight-meta">${summary.searchesPerHour} reward searches/hr</span>
+    </article>`;
+
+  container.innerHTML = gpCard + xpCard;
 }
 
 function appendGotrRow(tbody, row, searchesPerHour) {
@@ -65,7 +91,8 @@ function appendGotrRow(tbody, row, searchesPerHour) {
 
 function renderGotr(prices) {
   const tbody = document.querySelector("#gotr-table tbody");
-  const status = document.getElementById("gotr-status");
+  const throughput = document.getElementById("gotr-throughput");
+  const setupSummary = document.getElementById("gotr-setup-summary");
   tbody.innerHTML = "";
 
   const options = gotrOptionsFromForm();
@@ -76,7 +103,9 @@ function renderGotr(prices) {
     appendGotrRow(tbody, row, summary.searchesPerHour);
   }
 
-  status.textContent = gotrStatusText(options, summary);
+  renderGotrHighlights(options, summary);
+  if (throughput) throughput.textContent = gotrThroughputText(options, summary);
+  if (setupSummary) setupSummary.textContent = gotrSetupSummary(options);
 }
 
 function bindGotrControls() {
